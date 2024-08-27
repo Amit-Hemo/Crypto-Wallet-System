@@ -21,6 +21,13 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Start other services (nest-cli required):
+
+```bash
+$ nest start wallet
+$ nest start rate
+```
+
 ## Run tests
 
 ```bash
