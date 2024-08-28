@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Headers, Param } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 
 @Controller('wallet')
@@ -11,7 +11,10 @@ export class WalletController {
   }
 
   @Get('/:walletId')
-  getWallet(@Param('walletId') walletId: string): string {
-    return this.walletService.getWalletWithId(walletId);
+  getWallet(
+    @Headers('X-User-ID') userId: string,
+    @Param('walletId') walletId: string,
+  ): string {
+    return this.walletService.getWalletWithId(walletId, userId);
   }
 }

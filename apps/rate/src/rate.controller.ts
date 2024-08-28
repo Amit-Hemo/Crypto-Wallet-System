@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Headers, Param } from '@nestjs/common';
 import { RateService } from './rate.service';
 
 @Controller('rate')
@@ -11,7 +11,10 @@ export class RateController {
   }
 
   @Get('/:cryptoSymbol')
-  getCryptoRate(@Param('cryptoSymbol') cryptoSymbol: string): string {
-    return this.rateService.getCryptoRate(cryptoSymbol);
+  getCryptoRate(
+    @Headers('X-User-ID') userId: string,
+    @Param('cryptoSymbol') cryptoSymbol: string,
+  ): string {
+    return this.rateService.getCryptoRate(cryptoSymbol, userId);
   }
 }
