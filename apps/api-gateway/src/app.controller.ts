@@ -4,7 +4,7 @@ import { lastValueFrom } from 'rxjs';
 import { AuthGuard } from './auth.guard';
 
 @UseGuards(AuthGuard)
-@Controller('/api/v1')
+@Controller()
 export class AppController {
   constructor(private readonly httpService: HttpService) {}
 
