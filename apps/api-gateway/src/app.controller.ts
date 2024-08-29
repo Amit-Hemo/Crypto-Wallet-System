@@ -1,12 +1,34 @@
-import { HttpService } from '@nestjs/axios';
+import { GetRateDTO } from '@app/shared/dto/rate/rate.dto';
+import { GetWalletDTO } from '@app/shared/dto/wallet/wallet.dto';
 import { Controller, Get, Headers, Param, UseGuards } from '@nestjs/common';
-import { lastValueFrom } from 'rxjs';
+import {
+  ClientProxy,
+  ClientProxyFactory,
+  Transport,
+} from '@nestjs/microservices';
 import { AuthGuard } from './auth.guard';
 
 @UseGuards(AuthGuard)
 @Controller()
 export class AppController {
-  constructor(private readonly httpService: HttpService) {}
+  private clientWalletService: ClientProxy;
+  private clientRateService: ClientProxy;
+  constructor() {
+    this.clientWalletService = ClientProxyFactory.create({
+      transport: Transport.TCP,
+      options: {
+        host: 'localhost',
+        port: 3001,
+      },
+    });
+    this.clientRateService = ClientProxyFactory.create({
+      transport: Transport.TCP,
+      options: {
+        host: 'localhost',
+        port: 3002,
+      },
+    });
+  }
 
   @Get('/')
   getHello(): string {
@@ -17,26 +39,17 @@ export class AppController {
   async getWallet(
     @Param('walletId') walletId: string,
     @Headers('X-User-ID') userId: string,
-  ): Promise<string> {
-    const response = await lastValueFrom(
-      this.httpService.get<string>(`http://localhost:3001/wallet/${walletId}`, {
-        headers: { 'X-User-ID': userId },
-      }),
-    );
-    return response.data;
+  ) {
+    const payload: GetWalletDTO = { walletId, userId };
+    return this.clientWalletService.send({ cmd: 'get_wallet' }, payload);
   }
 
-  @Get('/rate/:cryptoSymbol')
+  @Get('/rate/:currency')
   async getCryptoRate(
-    @Param('cryptoSymbol') cryptoSymbol: string,
+    @Param('currency') currency: string,
     @Headers('X-User-ID') userId: string,
-  ): Promise<string> {
-    const response = await lastValueFrom(
-      this.httpService.get<string>(
-        `http://localhost:3002/rate/${cryptoSymbol}`,
-        { headers: { 'X-User-ID': userId } },
-      ),
-    );
-    return response.data;
+  ) {
+    const payload: GetRateDTO = { userId, currency };
+    return this.clientRateService.send({ cmd: 'get_rate' }, payload);
   }
 }

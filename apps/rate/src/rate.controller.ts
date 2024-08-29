@@ -1,20 +1,14 @@
-import { Controller, Get, Headers, Param } from '@nestjs/common';
+import { GetRateDTO } from '@app/shared/dto/rate/rate.dto';
+import { Controller } from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
 import { RateService } from './rate.service';
 
 @Controller('rate')
 export class RateController {
   constructor(private readonly rateService: RateService) {}
 
-  @Get()
-  getHello(): string {
-    return this.rateService.getHello();
-  }
-
-  @Get('/:cryptoSymbol')
-  getCryptoRate(
-    @Headers('X-User-ID') userId: string,
-    @Param('cryptoSymbol') cryptoSymbol: string,
-  ): string {
-    return this.rateService.getCryptoRate(cryptoSymbol, userId);
+  @MessagePattern({ cmd: 'get_rate' })
+  getCryptoRate(data: GetRateDTO): string {
+    return this.rateService.getCryptoRate(data.currency, data.userId);
   }
 }
