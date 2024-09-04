@@ -19,13 +19,13 @@
         "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
       }
     },
-    "wallet": {
+    "balance": {
       "type": "application",
-      "root": "apps/wallet",
+      "root": "apps/balance",
       "entryFile": "main",
-      "sourceRoot": "apps/wallet/src",
+      "sourceRoot": "apps/balance/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/wallet/tsconfig.app.json"
+        "tsConfigPath": "apps/balance/tsconfig.app.json"
       }
     },
     "rate": {

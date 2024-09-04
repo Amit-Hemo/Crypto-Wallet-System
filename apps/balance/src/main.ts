@@ -1,11 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { WalletModule } from './wallet.module';
+import { BalanceModule } from './balance.module';
 
 async function bootstrap() {
-  console.log('starting wallet service');
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    WalletModule,
+    BalanceModule,
     {
       transport: Transport.TCP,
       options: {
@@ -16,6 +15,6 @@ async function bootstrap() {
   );
 
   await app.listen();
-  console.log('wallet service is listening');
+  console.log('balance service is listening');
 }
 bootstrap();

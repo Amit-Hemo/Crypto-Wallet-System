@@ -3,7 +3,6 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { RateModule } from './rate.module';
 
 async function bootstrap() {
-  console.log('starting wallet service');
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     RateModule,
     {

@@ -1,5 +1,5 @@
+import { GetBalanceDTO } from '@app/shared/dto/balance/balance.dto';
 import { GetRateDTO } from '@app/shared/dto/rate/rate.dto';
-import { GetWalletDTO } from '@app/shared/dto/wallet/wallet.dto';
 import { Controller, Get, Headers, Param, UseGuards } from '@nestjs/common';
 import {
   ClientProxy,
@@ -11,10 +11,10 @@ import { AuthGuard } from './auth.guard';
 @UseGuards(AuthGuard)
 @Controller()
 export class AppController {
-  private clientWalletService: ClientProxy;
+  private clientBalanceService: ClientProxy;
   private clientRateService: ClientProxy;
   constructor() {
-    this.clientWalletService = ClientProxyFactory.create({
+    this.clientBalanceService = ClientProxyFactory.create({
       transport: Transport.TCP,
       options: {
         host: 'localhost',
@@ -35,13 +35,13 @@ export class AppController {
     return 'hello';
   }
 
-  @Get('/wallet/:walletId')
-  async getWallet(
-    @Param('walletId') walletId: string,
+  @Get('/balance/:balanceId')
+  async getBalance(
+    @Param('balanceId') balanceId: string,
     @Headers('X-User-ID') userId: string,
   ) {
-    const payload: GetWalletDTO = { walletId, userId };
-    return this.clientWalletService.send({ cmd: 'get_wallet' }, payload);
+    const payload: GetBalanceDTO = { balanceId, userId };
+    return this.clientBalanceService.send({ cmd: 'get_balance' }, payload);
   }
 
   @Get('/rate/:currency')
