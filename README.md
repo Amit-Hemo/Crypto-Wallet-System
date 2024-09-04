@@ -1,4 +1,4 @@
-## Crypto-Wallet-System
+## Crypto-Balance-System
 
 The system will allow users to manage their crypto holdings and view current valuations built with NestJS.
 

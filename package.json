@@ -1,7 +1,7 @@
 {
-  "name": "crypto-wallet-system",
+  "name": "crypto-balance-system",
   "version": "0.0.1",
-  "description": "Crypto wallet system",
+  "description": "Crypto Balance System",
   "author": "Amit Hemo",
   "private": true,
   "license": "UNLICENSED",
