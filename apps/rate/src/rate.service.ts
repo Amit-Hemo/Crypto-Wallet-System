@@ -1,7 +1,12 @@
+import { AppLoggerService } from '@app/shared';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class RateService {
+  constructor(private readonly logger: AppLoggerService) {
+    this.logger.setContext(RateService.name);
+  }
+
   getHello(): string {
     return 'Hello from rate service';
   }

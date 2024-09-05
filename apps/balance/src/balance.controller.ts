@@ -8,7 +8,7 @@ export class BalanceController {
   constructor(private readonly balanceService: BalanceService) {}
 
   @MessagePattern({ cmd: 'get_balance' })
-  getBalance(data: GetBalanceDTO): string {
+  async getBalance(data: GetBalanceDTO): Promise<string> {
     return this.balanceService.getBalanceWithId(data.balanceId, data.userId);
   }
 }
