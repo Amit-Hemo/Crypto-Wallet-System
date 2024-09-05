@@ -2,7 +2,6 @@ import {
   AddAssetDto,
   AddAssetWithUserIDDto,
 } from '@app/shared/dto/add-asset.dto';
-import { isValidationError } from '@app/shared/utils/isValidationError';
 import {
   BadRequestException,
   Body,
@@ -56,8 +55,8 @@ export class AppController {
     const payload: AddAssetWithUserIDDto = { ...assetDto, userId };
     return this.clientBalanceService.send({ cmd: 'add_asset' }, payload).pipe(
       catchError((error) => {
-        if (isValidationError(error)) {
-          return throwError(() => new BadRequestException(error));
+        if (error instanceof BadRequestException) {
+          return throwError(() => error);
         }
         return throwError(() => new InternalServerErrorException(error));
       }),

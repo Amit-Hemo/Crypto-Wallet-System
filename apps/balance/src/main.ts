@@ -1,5 +1,5 @@
 import { AppLoggerService } from '@app/shared';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import {
   MicroserviceOptions,
@@ -24,7 +24,8 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       forbidUnknownValues: true,
-      exceptionFactory: (errors) => new RpcException(errors),
+      exceptionFactory: (errors) =>
+        new RpcException(new BadRequestException(errors)),
     }),
   );
   await app.listen();
