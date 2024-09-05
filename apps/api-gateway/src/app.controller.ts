@@ -1,11 +1,17 @@
 import { AddAssetDto, AddAssetPayloadDto } from '@app/shared/dto/add-asset.dto';
 import {
+  RemoveAssetDto,
+  RemoveAssetPayloadDto,
+} from '@app/shared/dto/remove-asset.dto';
+import {
   BadRequestException,
   Body,
   Controller,
   Get,
   Headers,
   InternalServerErrorException,
+  Param,
+  Patch,
   Put,
   UseGuards,
 } from '@nestjs/common';
@@ -58,5 +64,27 @@ export class AppController {
         return throwError(() => new InternalServerErrorException(error));
       }),
     );
+  }
+
+  @Patch('/balances/assets/:id')
+  async removeAssetFromBalance(
+    @Headers('X-User-ID') userId: string,
+    @Param('id') assetId: string,
+    @Body() body: RemoveAssetDto,
+  ) {
+    const payload: RemoveAssetPayloadDto = { ...body, id: assetId, userId };
+    return this.clientBalanceService
+      .send({ cmd: 'remove_asset' }, payload)
+      .pipe(
+        catchError((error) => {
+          if (
+            error instanceof BadRequestException ||
+            error instanceof BadRequestException
+          ) {
+            return throwError(() => error);
+          }
+          return throwError(() => new InternalServerErrorException(error));
+        }),
+      );
   }
 }

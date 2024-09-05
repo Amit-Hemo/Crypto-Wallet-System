@@ -1,6 +1,7 @@
 import { AppLoggerService } from '@app/shared';
 import { SuccessResponse } from '@app/shared/api/responses';
 import { AddAssetPayloadDto } from '@app/shared/dto/add-asset.dto';
+import { RemoveAssetPayloadDto } from '@app/shared/dto/remove-asset.dto';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { BalanceService } from './balance.service';
@@ -32,6 +33,27 @@ export class BalanceController {
         `Error processing request for user ${userId}: ${error.message}`,
       );
       throw new RpcException('Failed to add asset to the user');
+    }
+  }
+
+  @MessagePattern({ cmd: 'remove_asset' })
+  async removeAssetFromBalance(@Payload() payload: RemoveAssetPayloadDto) {
+    const { userId, id: assetId, amount } = payload;
+    this.logger.log(`Received request to remove asset for user ${userId}`);
+    try {
+      await this.balanceService.removeAssetFromBalance(userId, assetId, amount);
+
+      const message = `Successfully removed asset ${assetId} for user ${userId}`;
+      this.logger.log(message);
+      return new SuccessResponse(message);
+    } catch (error) {
+      this.logger.error(
+        `Error processing request for user ${userId}: ${error.message}`,
+      );
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      throw new RpcException('Failed to remove asset from user balance');
     }
   }
 }

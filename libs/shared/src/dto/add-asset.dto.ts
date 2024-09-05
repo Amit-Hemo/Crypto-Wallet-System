@@ -1,5 +1,7 @@
-import { IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+import { IntersectionType } from '@nestjs/mapped-types';
+import { IsNumber, Min } from 'class-validator';
 import { BaseAssetDto } from './base-asset.dto';
+import { UserIdDto } from './user-id.dto';
 
 export class AddAssetDto extends BaseAssetDto {
   @IsNumber()
@@ -7,8 +9,7 @@ export class AddAssetDto extends BaseAssetDto {
   amount: number;
 }
 
-export class AddAssetPayloadDto extends AddAssetDto {
-  @IsString()
-  @IsNotEmpty()
-  userId: string;
-}
+export class AddAssetPayloadDto extends IntersectionType(
+  AddAssetDto,
+  UserIdDto,
+) {}
