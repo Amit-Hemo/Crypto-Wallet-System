@@ -1,6 +1,11 @@
 import { AppLoggerService } from '@app/shared';
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import {
+  MicroserviceOptions,
+  RpcException,
+  Transport,
+} from '@nestjs/microservices';
 import { BalanceModule } from './balance.module';
 
 async function bootstrap() {
@@ -16,8 +21,16 @@ async function bootstrap() {
     },
   );
   app.useLogger(new AppLoggerService());
-
+  app.useGlobalPipes(
+    new ValidationPipe({
+      forbidUnknownValues: true,
+      exceptionFactory: (errors) => new RpcException(errors),
+    }),
+  );
   await app.listen();
-  console.log('balance service is listening');
+
+  const logger = new AppLoggerService();
+  logger.setContext(BalanceModule.name);
+  logger.log('Balance service is listening for requests.');
 }
 bootstrap();

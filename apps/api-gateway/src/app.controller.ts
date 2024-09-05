@@ -1,11 +1,24 @@
-import { GetBalanceDTO } from '@app/shared/dto/balance/balance.dto';
-import { GetRateDTO } from '@app/shared/dto/rate/rate.dto';
-import { Controller, Get, Headers, Param, UseGuards } from '@nestjs/common';
+import {
+  AddAssetDto,
+  AddAssetWithUserIDDto,
+} from '@app/shared/dto/add-asset.dto';
+import { isValidationError } from '@app/shared/utils/isValidationError';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Headers,
+  InternalServerErrorException,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ClientProxy,
   ClientProxyFactory,
   Transport,
 } from '@nestjs/microservices';
+import { catchError, throwError } from 'rxjs';
 import { AuthGuard } from './auth.guard';
 
 @UseGuards(AuthGuard)
@@ -35,21 +48,19 @@ export class AppController {
     return 'hello';
   }
 
-  @Get('/balance/:balanceId')
-  async getBalance(
-    @Param('balanceId') balanceId: string,
+  @Put('/balances/assets')
+  async addAssetToBalance(
     @Headers('X-User-ID') userId: string,
+    @Body() assetDto: AddAssetDto,
   ) {
-    const payload: GetBalanceDTO = { balanceId, userId };
-    return this.clientBalanceService.send({ cmd: 'get_balance' }, payload);
-  }
-
-  @Get('/rate/:currency')
-  async getCryptoRate(
-    @Param('currency') currency: string,
-    @Headers('X-User-ID') userId: string,
-  ) {
-    const payload: GetRateDTO = { userId, currency };
-    return this.clientRateService.send({ cmd: 'get_rate' }, payload);
+    const payload: AddAssetWithUserIDDto = { ...assetDto, userId };
+    return this.clientBalanceService.send({ cmd: 'add_asset' }, payload).pipe(
+      catchError((error) => {
+        if (isValidationError(error)) {
+          return throwError(() => new BadRequestException(error));
+        }
+        return throwError(() => new InternalServerErrorException(error));
+      }),
+    );
   }
 }

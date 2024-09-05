@@ -1,14 +1,37 @@
-import { GetBalanceDTO } from '@app/shared/dto/balance/balance.dto';
+import { AppLoggerService } from '@app/shared';
+import { SuccessResponse } from '@app/shared/api/responses';
+import { AddAssetWithUserIDDto } from '@app/shared/dto/add-asset.dto';
 import { Controller } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { BalanceService } from './balance.service';
 
-@Controller('balance')
+@Controller()
 export class BalanceController {
-  constructor(private readonly balanceService: BalanceService) {}
+  constructor(
+    private readonly balanceService: BalanceService,
+    private readonly logger: AppLoggerService,
+  ) {
+    logger.setContext(BalanceController.name);
+  }
 
-  @MessagePattern({ cmd: 'get_balance' })
-  async getBalance(data: GetBalanceDTO): Promise<string> {
-    return this.balanceService.getBalanceWithId(data.balanceId, data.userId);
+  @MessagePattern({ cmd: 'add_asset' })
+  async addAssetToBalance(@Payload() payload: AddAssetWithUserIDDto) {
+    const { userId, ...asset } = payload;
+    this.logger.log(`Received request to add/update asset for user ${userId}`);
+    try {
+      const updatedBalance = await this.balanceService.addAssetToBalance(
+        userId,
+        asset,
+      );
+
+      const message = `Successfully added asset ${asset.name} for user ${userId}`;
+      this.logger.log(message);
+      return new SuccessResponse(message, updatedBalance);
+    } catch (error) {
+      this.logger.error(
+        `Error processing request for user ${userId}: ${error.message}`,
+      );
+      throw new RpcException('Failed to add asset to the user');
+    }
   }
 }
