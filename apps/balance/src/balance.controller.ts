@@ -1,6 +1,6 @@
 import { AppLoggerService } from '@app/shared';
 import { SuccessResponse } from '@app/shared/api/responses';
-import { AddAssetWithUserIDDto } from '@app/shared/dto/add-asset.dto';
+import { AddAssetPayloadDto } from '@app/shared/dto/add-asset.dto';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { BalanceService } from './balance.service';
@@ -15,7 +15,7 @@ export class BalanceController {
   }
 
   @MessagePattern({ cmd: 'add_asset' })
-  async addAssetToBalance(@Payload() payload: AddAssetWithUserIDDto) {
+  async addAssetToBalance(@Payload() payload: AddAssetPayloadDto) {
     const { userId, ...asset } = payload;
     this.logger.log(`Received request to add/update asset for user ${userId}`);
     try {

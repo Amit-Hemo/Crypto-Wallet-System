@@ -1,7 +1,4 @@
-import {
-  AddAssetDto,
-  AddAssetWithUserIDDto,
-} from '@app/shared/dto/add-asset.dto';
+import { AddAssetDto, AddAssetPayloadDto } from '@app/shared/dto/add-asset.dto';
 import {
   BadRequestException,
   Body,
@@ -52,7 +49,7 @@ export class AppController {
     @Headers('X-User-ID') userId: string,
     @Body() assetDto: AddAssetDto,
   ) {
-    const payload: AddAssetWithUserIDDto = { ...assetDto, userId };
+    const payload: AddAssetPayloadDto = { ...assetDto, userId };
     return this.clientBalanceService.send({ cmd: 'add_asset' }, payload).pipe(
       catchError((error) => {
         if (error instanceof BadRequestException) {

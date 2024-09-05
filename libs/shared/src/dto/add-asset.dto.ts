@@ -7,7 +7,7 @@ export class AddAssetDto extends BaseAssetDto {
   amount: number;
 }
 
-export class AddAssetWithUserIDDto extends AddAssetDto {
+export class AddAssetPayloadDto extends AddAssetDto {
   @IsString()
   @IsNotEmpty()
   userId: string;
