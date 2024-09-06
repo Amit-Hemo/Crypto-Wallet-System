@@ -1,6 +1,11 @@
 import { AppLoggerService } from '@app/shared';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import {
+  MicroserviceOptions,
+  RpcException,
+  Transport,
+} from '@nestjs/microservices';
 import { RateModule } from './rate.module';
 
 async function bootstrap() {
@@ -16,8 +21,17 @@ async function bootstrap() {
     },
   );
   app.useLogger(new AppLoggerService());
-
+  app.useGlobalPipes(
+    new ValidationPipe({
+      forbidUnknownValues: true,
+      exceptionFactory: (errors) =>
+        new RpcException(new BadRequestException(errors)),
+    }),
+  );
   await app.listen();
-  console.log('rate service is listening');
+
+  const logger = new AppLoggerService();
+  logger.setContext(RateModule.name);
+  logger.log('Rate service is listening for requests.');
 }
 bootstrap();

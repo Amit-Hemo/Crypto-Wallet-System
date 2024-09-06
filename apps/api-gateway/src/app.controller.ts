@@ -1,4 +1,5 @@
 import { AddAssetDto, AddAssetPayloadDto } from '@app/shared/dto/add-asset.dto';
+import { GetRateDto, GetRatePayloadDto } from '@app/shared/dto/get-rate.dto';
 import {
   RemoveAssetDto,
   RemoveAssetPayloadDto,
@@ -15,6 +16,7 @@ import {
   Param,
   Patch,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -97,12 +99,28 @@ export class AppController {
         catchError((error) => {
           if (
             error instanceof BadRequestException ||
-            error instanceof BadRequestException
+            error instanceof NotFoundException
           ) {
             return throwError(() => error);
           }
           return throwError(() => new InternalServerErrorException(error));
         }),
       );
+  }
+
+  @Get('/rates')
+  async getCryptoRate(
+    @Headers('X-User-ID') userId: string,
+    @Query() exchangeDetails: GetRateDto,
+  ) {
+    const payload: GetRatePayloadDto = { userId, ...exchangeDetails };
+    return this.clientRateService.send({ cmd: 'get_rate' }, payload).pipe(
+      catchError((error) => {
+        if (error instanceof BadRequestException) {
+          return throwError(() => error);
+        }
+        return throwError(() => new InternalServerErrorException(error));
+      }),
+    );
   }
 }

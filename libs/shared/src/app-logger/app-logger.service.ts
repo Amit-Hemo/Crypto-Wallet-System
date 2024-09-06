@@ -1,6 +1,7 @@
 import { Injectable, LoggerService, Scope } from '@nestjs/common';
 import * as path from 'path';
 import * as winston from 'winston';
+import { discoverServicePath } from '../utils/discoverServicePath';
 import { LogMetadata } from './app-logger.interface';
 import { logLevels } from './log-levels';
 
@@ -9,7 +10,7 @@ export class AppLoggerService implements LoggerService {
   private readonly logger: winston.Logger;
 
   constructor() {
-    const LOG_DIR_PATH = path.join(this.discoverServicePath(), 'logs');
+    const LOG_DIR_PATH = path.join(discoverServicePath(__dirname), 'logs');
 
     this.logger = winston.createLogger({
       level: logLevels.INFO,
@@ -48,14 +49,6 @@ export class AppLoggerService implements LoggerService {
         }),
       );
     }
-  }
-
-  private discoverServicePath(): string {
-    const [rootDir, servicePathFromRoot] = path
-      .resolve(__dirname)
-      .split('dist');
-
-    return `${rootDir.slice(0, rootDir.length - 1)}${servicePathFromRoot}`;
   }
 
   setContext(context: string = 'App') {
