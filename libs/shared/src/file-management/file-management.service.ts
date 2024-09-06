@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { discoverServicePath } from '../utils/discoverServicePath';
+import { discoverServicePath } from '../general/service-path.util';
 
 @Injectable()
 export class FileManagementService {

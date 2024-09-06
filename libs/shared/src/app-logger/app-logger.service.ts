@@ -1,7 +1,7 @@
 import { Injectable, LoggerService, Scope } from '@nestjs/common';
 import * as path from 'path';
 import * as winston from 'winston';
-import { discoverServicePath } from '../utils/discoverServicePath';
+import { discoverServicePath } from '../general/service-path.util';
 import { LogMetadata } from './app-logger.interface';
 import { logLevels } from './log-levels';
 

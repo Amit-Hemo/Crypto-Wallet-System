@@ -19,10 +19,13 @@ export class RateController {
     const { id: assetId, currency } = data;
     this.logger.log(`Received request to retrieve rate`);
     try {
-      const rate = await this.rateService.getCryptoRate(assetId, currency);
+      const { rate, cached } = await this.rateService.getCryptoRate(
+        assetId,
+        currency,
+      );
       const message = `Successfully retrieved rate`;
       this.logger.log(message);
-      return new SuccessResponse(message, rate);
+      return new SuccessResponse(message, rate, cached);
     } catch (error) {
       this.logger.error(`Error processing request: ${error.message}`);
       if (error instanceof RpcException) {

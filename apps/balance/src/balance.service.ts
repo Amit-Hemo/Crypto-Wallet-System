@@ -119,7 +119,7 @@ export class BalanceService {
 
       existingAsset.amount -= amount;
       if (existingAsset.amount === 0) {
-        this.logger.warn(
+        this.logger.log(
           `Asset ${existingAsset.name} has been descread to 0, removing asset entirely`,
         );
         userBalance.assets = userBalance.assets.filter(
