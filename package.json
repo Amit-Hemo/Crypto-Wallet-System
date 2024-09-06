@@ -28,6 +28,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/microservices": "^10.4.1",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/schedule": "^4.1.0",
     "axios": "^1.7.5",
     "cache-manager": "^5.7.6",
     "class-transformer": "^0.5.1",

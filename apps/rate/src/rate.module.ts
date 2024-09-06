@@ -4,6 +4,7 @@ import { HttpModule } from '@nestjs/axios';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import * as path from 'path';
 import { RateController } from './rate.controller';
 import { RateService } from './rate.service';
@@ -23,6 +24,7 @@ import { RateService } from './rate.service';
     CacheModule.register({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
   ],
   controllers: [RateController],
   providers: [RateService],

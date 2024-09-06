@@ -11,6 +11,7 @@ import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RpcException } from '@nestjs/microservices';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { AxiosError } from 'axios';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
 
@@ -61,9 +62,33 @@ export class RateService {
       );
     }
     response.rates.push(...fetchResults);
-    await this.cacheFreshResults(fetchResults, currency);
+    await this.cacheFreshResults(fetchResults, currency, 5 * TTlTimes.MINUTE);
 
     return response;
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, {
+    name: 'update_rates',
+  })
+  private async updateRate() {
+    this.logger.log(`[CRON] Refreshing rates...`);
+    const assetIds = this.configService
+      .get<string>('CRON_ASSET_IDS')
+      .split(',');
+    const currencies = this.configService
+      .get<string>('CRON_CURRENCIES')
+      .split(',');
+    try {
+      for (const currency of currencies) {
+        const rates = await this.fetchRates(assetIds, currency);
+        await this.cacheFreshResults(rates, currency, TTlTimes.HOUR);
+      }
+      this.logger.log(`[CRON] Rates are updated`);
+    } catch (error) {
+      this.logger.warn(
+        `[CRON] An error occured while updating rates: ${error}`,
+      );
+    }
   }
 
   private async fetchRates(
@@ -134,13 +159,17 @@ export class RateService {
     return { staleAssetIds, cachedResults };
   }
 
-  private async cacheFreshResults(fetchResults: Rate[], currency: string) {
+  private async cacheFreshResults(
+    fetchResults: Rate[],
+    currency: string,
+    ttl: number,
+  ) {
     for (const data of fetchResults) {
       const assetId = Object.keys(data)[0];
       const rate = Object.values(data)[0];
       const cacheKey = generateCacheKey(assetId, currency);
       try {
-        await this.cacheManager.set(cacheKey, rate, TTlTimes.MINUTE);
+        await this.cacheManager.set(cacheKey, rate, ttl);
       } catch (error) {
         this.logger.warn(
           `Failed to update cache with rate for assetId ${assetId} and currency ${currency}: ${error}`,
