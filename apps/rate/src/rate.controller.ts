@@ -1,6 +1,7 @@
 import { AppLoggerService } from '@app/shared';
 import { SuccessResponse } from '@app/shared/api/responses';
 import { GetRatePayloadDto } from '@app/shared/dto/get-rate.dto';
+import { RatesResponse } from '@app/shared/interfaces/rate.interface';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { RateService } from './rate.service';
@@ -16,16 +17,16 @@ export class RateController {
 
   @MessagePattern({ cmd: 'get_rate' })
   async getCryptoRate(@Payload() data: GetRatePayloadDto) {
-    const { id: assetId, currency } = data;
+    const { assetIds, currency } = data;
     this.logger.log(`Received request to retrieve rate`);
     try {
-      const { rate, cached } = await this.rateService.getCryptoRate(
-        assetId,
+      const response: RatesResponse = await this.rateService.getCryptoRate(
+        assetIds.split(','),
         currency,
       );
-      const message = `Successfully retrieved rate`;
+      const message = `Successfully retrieved rates for currency ${currency}`;
       this.logger.log(message);
-      return new SuccessResponse(message, rate, cached);
+      return new SuccessResponse(message, response);
     } catch (error) {
       this.logger.error(`Error processing request: ${error.message}`);
       if (error instanceof RpcException) {

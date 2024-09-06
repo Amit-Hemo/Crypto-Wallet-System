@@ -1,4 +1,4 @@
-import { Cached } from './cached.interface';
+type CacheStatus = 'all' | 'partial' | 'none';
 
 export interface CoinGeckoApiRateResponse {
   [assetId: string]: {
@@ -6,6 +6,10 @@ export interface CoinGeckoApiRateResponse {
   };
 }
 
-export interface Rate extends Cached {
-  rate: number;
+export type Rate = Record<string, number>;
+
+export interface RatesResponse {
+  currency: string;
+  rates: Rate[];
+  cached: CacheStatus;
 }

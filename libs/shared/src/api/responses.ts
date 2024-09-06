@@ -3,6 +3,5 @@ export class SuccessResponse<T> {
   constructor(
     private readonly message: string,
     private readonly data: T | null = null,
-    private readonly isCached: boolean = false,
   ) {}
 }

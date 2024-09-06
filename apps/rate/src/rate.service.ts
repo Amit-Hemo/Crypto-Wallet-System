@@ -4,6 +4,7 @@ import { TTlTimes } from '@app/shared/cache/ttl-times';
 import {
   CoinGeckoApiRateResponse,
   Rate,
+  RatesResponse,
 } from '@app/shared/interfaces/rate.interface';
 import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
@@ -24,39 +25,54 @@ export class RateService {
     this.logger.setContext(RateService.name);
   }
 
-  async getCryptoRate(assetId: string, currency: string): Promise<Rate> {
-    const cacheKey = generateCacheKey(assetId, currency);
-    try {
-      const cachedRate = await this.cacheManager.get<number>(cacheKey);
-      if (cachedRate) {
-        this.logger.log(`Cache hit for key ${cacheKey}`);
-        return { rate: cachedRate, cached: true };
-      }
-    } catch (error) {
-      this.logger.warn(
-        `Failed to get rate for assetId ${assetId} and currency ${currency} from cache, will fetch from api: ${error}`,
-      );
+  async getCryptoRate(
+    assetIds: string[],
+    currency: string,
+  ): Promise<RatesResponse> {
+    const response: RatesResponse = {
+      rates: [],
+      currency,
+      cached: 'none',
+    };
+
+    const { staleAssetIds, cachedResults } = await this.lookupCache(
+      assetIds,
+      currency,
+    );
+    response.rates.push(...cachedResults);
+    if (cachedResults.length === assetIds.length) {
+      response.cached = 'all';
+      return response;
+    } else if (cachedResults.length > 0) {
+      response.cached = 'partial';
     }
 
-    const rate = await this.fetchRate(assetId, currency);
-    const message = `Successfully fetched rate for asset ${assetId} by currency ${currency} from CoinGeckoAPI`;
-    this.logger.log(message);
+    const fetchResults = await this.fetchRates(staleAssetIds, currency);
 
-    try {
-      await this.cacheManager.set(cacheKey, rate, TTlTimes.MINUTE);
-      this.logger.log(`Updated cache: key ${cacheKey}, rate ${rate}`);
-    } catch (error) {
-      this.logger.warn(
-        `Failed to update cache with rate for assetId ${assetId} and currency ${currency}: ${error}`,
+    if (fetchResults.length === 0 && cachedResults.length === 0) {
+      this.logger.error(`Invalid currency or no results for all given assets`);
+      throw new RpcException(
+        new BadRequestException('Invalid get rates request'),
       );
     }
+    if (fetchResults.length < staleAssetIds.length) {
+      this.logger.warn(
+        `Successful fetch but some assets are invalid here and hence omitted.`,
+      );
+    }
+    response.rates.push(...fetchResults);
+    await this.cacheFreshResults(fetchResults, currency);
 
-    return { rate, cached: false };
+    return response;
   }
 
-  private async fetchRate(assetId: string, currency: string): Promise<number> {
+  private async fetchRates(
+    assetIds: string[],
+    currency: string,
+  ): Promise<Rate[]> {
     const apiKey = this.configService.get<string>('COINGECKO_API_KEY');
-    const requestUrl = this.generateRequestURL(assetId, currency);
+    const requestUrl = this.generateRequestURL(assetIds, currency);
+
     const { data } = await firstValueFrom(
       this.httpService
         .get<CoinGeckoApiRateResponse>(requestUrl, {
@@ -78,20 +94,64 @@ export class RateService {
           }),
         ),
     );
-    if (!data[assetId] || !data[assetId][currency]) {
-      this.logger.error(
-        `An attempt was made to retrieve rate for an unavailable crypto or currency`,
-      );
-      throw new RpcException(
-        new BadRequestException(
-          'Rate not available for the given crypto or currency.',
-        ),
-      );
+
+    const message = `Successfully fetched rates for currency ${currency} from CoinGeckoAPI`;
+    this.logger.log(message);
+
+    const fetchedResults: Rate[] = [];
+    for (const [assetId, rateCurrencyPair] of Object.entries(data)) {
+      const isEmpty = Object.keys(rateCurrencyPair).length === 0;
+      //NOTE: CoinGecko API omits Rate-Curreny pairs inside for every asset when currency is invalid, so I stop here
+      if (isEmpty) break;
+      fetchedResults.push({ [assetId]: rateCurrencyPair[currency] });
     }
-    return data[assetId][currency];
+    return fetchedResults;
   }
 
-  private generateRequestURL(assetId: string, currency: string): string {
-    return `https://api.coingecko.com/api/v3/simple/price?ids=${assetId}&vs_currencies=${currency}&precision=2`;
+  private async lookupCache(
+    assetIds: string[],
+    currency: string,
+  ): Promise<{ staleAssetIds: string[]; cachedResults: Rate[] }> {
+    const staleAssetIds: string[] = [];
+    const cachedResults: Rate[] = [];
+
+    for (const id of assetIds) {
+      const cacheKey = generateCacheKey(id, currency);
+      try {
+        const cachedRate = await this.cacheManager.get<number>(cacheKey);
+        if (cachedRate) {
+          cachedResults.push({ [id]: cachedRate });
+        } else {
+          staleAssetIds.push(id);
+        }
+      } catch (error) {
+        this.logger.warn(
+          `Failed to get rate for assetId ${id} and currency ${currency} from cache, will fetch from API: ${error}`,
+        );
+        staleAssetIds.push(id);
+      }
+    }
+    return { staleAssetIds, cachedResults };
+  }
+
+  private async cacheFreshResults(fetchResults: Rate[], currency: string) {
+    for (const data of fetchResults) {
+      const assetId = Object.keys(data)[0];
+      const rate = Object.values(data)[0];
+      const cacheKey = generateCacheKey(assetId, currency);
+      try {
+        await this.cacheManager.set(cacheKey, rate, TTlTimes.MINUTE);
+      } catch (error) {
+        this.logger.warn(
+          `Failed to update cache with rate for assetId ${assetId} and currency ${currency}: ${error}`,
+        );
+      }
+    }
+    this.logger.log(`Updated cache with the fresh values`);
+  }
+
+  private generateRequestURL(assetIds: string[], currency: string): string {
+    const requestAssetIds = assetIds.join(',');
+    return `https://api.coingecko.com/api/v3/simple/price?ids=${requestAssetIds}&vs_currencies=${currency}&precision=2`;
   }
 }
