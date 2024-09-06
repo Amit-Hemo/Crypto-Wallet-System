@@ -15,6 +15,34 @@ export class BalanceService {
     this.logger.setContext(BalanceService.name);
   }
 
+  async getBalance(userId: string): Promise<UserBalance> {
+    try {
+      const data = await this.fileManagementService.readJSON<UserBalance[]>(
+        this.dbFilename,
+      );
+      const userBalance = data.find((balance) => balance.userId === userId);
+      if (!userBalance) {
+        this.logger.error(`User ${userId} is not found in db`);
+        throw new RpcException(
+          new NotFoundException('User does not have balance'),
+        );
+      }
+
+      const message = `Successfully retrieved user balance for ${userId}`;
+      this.logger.log(message);
+
+      return userBalance;
+    } catch (error) {
+      this.logger.error(
+        `Failed to retrieve user balance for ${userId}: ${error?.message ?? ''}`,
+      );
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      throw new RpcException('Failed to retrieve balance to the user');
+    }
+  }
+
   async addAssetToBalance(
     userId: string,
     asset: CryptoAsset,
@@ -42,6 +70,7 @@ export class BalanceService {
 
       const message = `Successfully added asset ${asset.name} by ${asset.amount} to user ${userId}'s balance`;
       this.logger.log(message);
+
       return userBalance;
     } catch (error) {
       this.logger.error(

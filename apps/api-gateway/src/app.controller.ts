@@ -3,6 +3,7 @@ import {
   RemoveAssetDto,
   RemoveAssetPayloadDto,
 } from '@app/shared/dto/remove-asset.dto';
+import { UserIdDto } from '@app/shared/dto/user-id.dto';
 import {
   BadRequestException,
   Body,
@@ -10,6 +11,7 @@ import {
   Get,
   Headers,
   InternalServerErrorException,
+  NotFoundException,
   Param,
   Patch,
   Put,
@@ -48,6 +50,22 @@ export class AppController {
   @Get('/')
   getHello(): string {
     return 'hello';
+  }
+
+  @Get('/balances/assets')
+  async getBalance(@Headers('X-User-ID') userId: string) {
+    const payload: UserIdDto = { userId };
+    return this.clientBalanceService.send({ cmd: 'get_balance' }, payload).pipe(
+      catchError((error) => {
+        if (
+          error instanceof BadRequestException ||
+          error instanceof NotFoundException
+        ) {
+          return throwError(() => error);
+        }
+        return throwError(() => new InternalServerErrorException(error));
+      }),
+    );
   }
 
   @Put('/balances/assets')
