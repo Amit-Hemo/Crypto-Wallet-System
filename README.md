@@ -8,23 +8,17 @@ The system will allow users to manage their crypto holdings and view current val
 $ npm install
 ```
 
-## Compile and run the project
+## Architecture
+<a href="https://app.eraser.io/workspace/nCeo9GJ8W4I2jVVdPZst?elements=PsIDxAlSMNf4pEHxKFnT9Q">View on Eraser<br /><img src="https://app.eraser.io/workspace/nCeo9GJ8W4I2jVVdPZst/preview?elements=PsIDxAlSMNf4pEHxKFnT9Q&type=embed" width=700 height=450/></a>
 
+## Compile and run the project
+(*nest-cli required*)
 ```bash
-# development
+# Start gateway
 $ npm run start
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Start other services (nest-cli required):
-
-```bash
-$ nest start wallet
+# Start Microservices
+$ nest start balance
 $ nest start rate
 ```
 
@@ -33,9 +27,6 @@ $ nest start rate
 ```bash
 # unit tests
 $ npm run test
-
-# e2e tests
-$ npm run test:e2e
 
 # test coverage
 $ npm run test:cov
