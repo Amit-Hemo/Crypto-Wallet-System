@@ -75,7 +75,9 @@ export class BalanceService {
       if (!userBalance) {
         this.logger.error(`User ${userId} is not found in db`);
         throw new RpcException(
-          new NotFoundException('User does not have balance'),
+          new NotFoundException(
+            'User does not have balance, please add assets to the user first and try again',
+          ),
         );
       }
 
@@ -176,7 +178,9 @@ export class BalanceService {
       if (!userBalance) {
         this.logger.error(`User ${userId} is not found in db`);
         throw new RpcException(
-          new NotFoundException('User does not have balance'),
+          new NotFoundException(
+            'User does not have balance, please add assets to the user first and try again',
+          ),
         );
       }
 

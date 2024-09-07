@@ -32,6 +32,7 @@ export class BalanceController {
       this.logger.error(
         `Error processing request for user ${userId}: ${error.message}`,
       );
+      if (error instanceof RpcException) throw error;
       throw new RpcException(error);
     }
   }
@@ -92,6 +93,7 @@ export class BalanceController {
       this.logger.error(
         `Error processing request for user ${userId}: ${error.message}`,
       );
+      if (error instanceof RpcException) throw error;
       throw new RpcException(error);
     }
   }
