@@ -5,12 +5,14 @@ import {
   RemoveAssetPayloadDto,
 } from '@app/shared/dto/remove-asset.dto';
 import { UserIdDto } from '@app/shared/dto/user-id.dto';
+import { serviceNames } from '@app/shared/general/service-names';
 import {
   BadRequestException,
   Body,
   Controller,
   Get,
   Headers,
+  Inject,
   InternalServerErrorException,
   NotFoundException,
   Param,
@@ -19,35 +21,16 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ClientProxy,
-  ClientProxyFactory,
-  Transport,
-} from '@nestjs/microservices';
+import { ClientProxy } from '@nestjs/microservices';
 import { catchError, throwError } from 'rxjs';
 import { AuthGuard } from './auth.guard';
 
 @UseGuards(AuthGuard)
 @Controller()
 export class AppController {
-  private clientBalanceService: ClientProxy;
-  private clientRateService: ClientProxy;
-  constructor() {
-    this.clientBalanceService = ClientProxyFactory.create({
-      transport: Transport.TCP,
-      options: {
-        host: 'localhost',
-        port: 3001,
-      },
-    });
-    this.clientRateService = ClientProxyFactory.create({
-      transport: Transport.TCP,
-      options: {
-        host: 'localhost',
-        port: 3002,
-      },
-    });
-  }
+  @Inject(serviceNames.BALANCE) private clientBalanceService: ClientProxy;
+  @Inject(serviceNames.RATE) private clientRateService: ClientProxy;
+  constructor() {}
 
   @Get('/')
   getHello(): string {
