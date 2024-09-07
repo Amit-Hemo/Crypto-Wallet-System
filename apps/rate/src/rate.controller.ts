@@ -1,5 +1,4 @@
 import { AppLoggerService } from '@app/shared';
-import { SuccessResponse } from '@app/shared/api/responses';
 import { GetRatePayloadDto } from '@app/shared/dto/get-rate.dto';
 import { RatesResponse } from '@app/shared/interfaces/rate.interface';
 import { Controller } from '@nestjs/common';
@@ -26,7 +25,7 @@ export class RateController {
       );
       const message = `Successfully retrieved rates for currency ${currency}`;
       this.logger.log(message);
-      return new SuccessResponse(message, response);
+      return response;
     } catch (error) {
       this.logger.error(`Error processing request: ${error.message}`);
       if (error instanceof RpcException) {

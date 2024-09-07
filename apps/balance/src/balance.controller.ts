@@ -1,6 +1,7 @@
 import { AppLoggerService } from '@app/shared';
 import { SuccessResponse } from '@app/shared/api/responses';
 import { AddAssetPayloadDto } from '@app/shared/dto/add-asset.dto';
+import { BalanceValueDto } from '@app/shared/dto/balance-value.dto';
 import { RemoveAssetPayloadDto } from '@app/shared/dto/remove-asset.dto';
 import { UserIdDto } from '@app/shared/dto/user-id.dto';
 import { Controller } from '@nestjs/common';
@@ -79,6 +80,32 @@ export class BalanceController {
         throw error;
       }
       throw new RpcException('Failed to remove asset from user balance');
+    }
+  }
+
+  @MessagePattern({ cmd: 'get_total_balance_value' })
+  async getTotalBalance(@Payload() payload: BalanceValueDto) {
+    const { userId, currency } = payload;
+    this.logger.log(`Received request get total balance for user ${userId}`);
+    try {
+      const totalBalance = await this.balanceService.getTotalBalance(
+        userId,
+        currency,
+      );
+
+      const message = `Successfully calculated total balance value for user ${userId}`;
+      this.logger.log(message);
+      return new SuccessResponse(message, totalBalance);
+    } catch (error) {
+      this.logger.error(
+        `Error processing request for user ${userId}: ${error.message}`,
+      );
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      throw new RpcException(
+        'Failed to get total balance value from user balance',
+      );
     }
   }
 }

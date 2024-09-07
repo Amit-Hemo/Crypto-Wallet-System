@@ -1,5 +1,5 @@
 import { AddAssetDto, AddAssetPayloadDto } from '@app/shared/dto/add-asset.dto';
-import { GetRateDto, GetRatePayloadDto } from '@app/shared/dto/get-rate.dto';
+import { BalanceValueDto } from '@app/shared/dto/balance-value.dto';
 import {
   RemoveAssetDto,
   RemoveAssetPayloadDto,
@@ -28,8 +28,9 @@ import { AuthGuard } from './auth.guard';
 @UseGuards(AuthGuard)
 @Controller()
 export class AppController {
-  @Inject(serviceNames.BALANCE) private clientBalanceService: ClientProxy;
-  @Inject(serviceNames.RATE) private clientRateService: ClientProxy;
+  @Inject(serviceNames.BALANCE)
+  private readonly clientBalanceService: ClientProxy;
+  @Inject(serviceNames.RATE) private readonly clientRateService: ClientProxy;
   constructor() {}
 
   @Get('/')
@@ -91,19 +92,21 @@ export class AppController {
       );
   }
 
-  @Get('/rates')
-  async getCryptoRate(
+  @Get('/balances/total')
+  async getTotalBalance(
     @Headers('X-User-ID') userId: string,
-    @Query() exchangeDetails: GetRateDto,
+    @Query('currency') currency: string,
   ) {
-    const payload: GetRatePayloadDto = { userId, ...exchangeDetails };
-    return this.clientRateService.send({ cmd: 'get_rate' }, payload).pipe(
-      catchError((error) => {
-        if (error instanceof BadRequestException) {
-          return throwError(() => error);
-        }
-        return throwError(() => new InternalServerErrorException(error));
-      }),
-    );
+    const payload: BalanceValueDto = { userId, currency };
+    return this.clientBalanceService
+      .send({ cmd: 'get_total_balance_value' }, payload)
+      .pipe(
+        catchError((error) => {
+          if (error instanceof BadRequestException) {
+            return throwError(() => error);
+          }
+          return throwError(() => new InternalServerErrorException(error));
+        }),
+      );
   }
 }

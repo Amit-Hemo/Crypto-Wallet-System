@@ -1,8 +1,12 @@
 import { AppLoggerService, FileManagementService } from '@app/shared';
+import { GetRatePayloadDto } from '@app/shared/dto/get-rate.dto';
+import { serviceNames } from '@app/shared/general/service-names';
 import { CryptoAsset } from '@app/shared/interfaces/asset.interface';
 import { UserBalance } from '@app/shared/interfaces/balance.interface';
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { Rate, RatesResponse } from '@app/shared/interfaces/rate.interface';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class BalanceService {
@@ -11,6 +15,7 @@ export class BalanceService {
   constructor(
     private readonly fileManagementService: FileManagementService,
     private readonly logger: AppLoggerService,
+    @Inject(serviceNames.RATE) private readonly clientRateService: ClientProxy,
   ) {
     this.logger.setContext(BalanceService.name);
   }
@@ -143,5 +148,38 @@ export class BalanceService {
       }
       throw new RpcException('Failed to remove asset to the user');
     }
+  }
+
+  async getTotalBalance(userId: string, currency: string): Promise<number> {
+    const { assets } = await this.getBalance(userId);
+    const assetIds = assets.map((asset) => asset.id).join(',');
+    const payload: GetRatePayloadDto = { userId, assetIds, currency };
+    const { rates: rateRecords } = await lastValueFrom(
+      this.clientRateService.send<RatesResponse>({ cmd: 'get_rate' }, payload),
+    );
+    return this.calculateTotalBalanceValue(rateRecords, assets);
+  }
+
+  private calculateTotalBalanceValue(
+    ratesRecords: Rate[],
+    assets: CryptoAsset[],
+  ) {
+    const ratesMap = new Map<string, number>(
+      ratesRecords.map((record) => [
+        Object.keys(record)[0],
+        Object.values(record)[0],
+      ]),
+    );
+    const totalBalanceValue = assets.reduce((prev, currAsset) => {
+      const { id, amount } = currAsset;
+      if (!ratesMap.has(id)) return prev;
+      const rate = ratesMap.get(id);
+      return prev + this.calculateBalanceValue(amount, rate);
+    }, 0);
+
+    return totalBalanceValue;
+  }
+  private calculateBalanceValue(amount: number, rateInCurrency: number) {
+    return amount * rateInCurrency;
   }
 }
