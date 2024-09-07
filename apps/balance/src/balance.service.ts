@@ -68,7 +68,7 @@ export class BalanceService {
         data,
       );
 
-      const message = `Successfully added asset ${asset.name} by ${asset.amount} to user ${userId}'s balance`;
+      const message = `Successfully added asset ${asset.id} by ${asset.amount} to user ${userId}'s balance`;
       this.logger.log(message);
 
       return userBalance;
@@ -120,7 +120,7 @@ export class BalanceService {
       existingAsset.amount -= amount;
       if (existingAsset.amount === 0) {
         this.logger.log(
-          `Asset ${existingAsset.name} has been descread to 0, removing asset entirely`,
+          `Asset ${existingAsset.id} has been descread to 0, removing asset entirely`,
         );
         userBalance.assets = userBalance.assets.filter(
           (currAsset) => currAsset.id !== assetId,
@@ -132,7 +132,7 @@ export class BalanceService {
         data,
       );
 
-      const message = `Successfully removed asset ${existingAsset.name} by ${amount} to user ${userId}'s balance`;
+      const message = `Successfully removed asset ${existingAsset.id} by ${amount} to user ${userId}'s balance`;
       this.logger.log(message);
     } catch (error) {
       this.logger.error(

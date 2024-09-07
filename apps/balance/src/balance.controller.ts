@@ -47,7 +47,7 @@ export class BalanceController {
         asset,
       );
 
-      const message = `Successfully added asset ${asset.name} for user ${userId}`;
+      const message = `Successfully added asset ${asset.id} for user ${userId}`;
       this.logger.log(message);
       return new SuccessResponse(message, updatedBalance);
     } catch (error) {
