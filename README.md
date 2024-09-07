@@ -21,13 +21,3 @@ $ npm run start
 $ nest start balance
 $ nest start rate
 ```
-
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# test coverage
-$ npm run test:cov
-```
