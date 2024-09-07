@@ -28,6 +28,12 @@ export class AppController {
   @Inject(serviceNames.RATE) private readonly clientRateService: ClientProxy;
   constructor() {}
 
+  /**
+   * Retrieve balance assets with their values against given currency for a user
+   * @param userId - The ID of the user (sent in the header)
+   * @param currency - The currency for which to retrieve the balance values
+   * @returns User balance
+   */
   @Get('/balances/assets')
   async getBalancesValues(
     @Headers('X-User-ID') userId: string,
@@ -37,6 +43,11 @@ export class AppController {
     return this.clientBalanceService.send({ cmd: 'get_balance' }, payload);
   }
 
+  /**
+   * Add a new asset to the user's balance or add to an existing one by amount
+   * @param userId - The ID of the user
+   * @param assetDto - The asset data
+   */
   @Put('/balances/assets')
   async addAssetToBalance(
     @Headers('X-User-ID') userId: string,
@@ -46,6 +57,12 @@ export class AppController {
     return this.clientBalanceService.send({ cmd: 'add_asset' }, payload);
   }
 
+  /**
+   * Decrease by amount (auto remove when empty) an asset from the user's balance
+   * @param userId - The ID of the user
+   * @param assetId - The ID of the asset to remove
+   * @param body - The amount to remove
+   */
   @Patch('/balances/assets/:id')
   async removeAssetFromBalance(
     @Headers('X-User-ID') userId: string,
@@ -56,6 +73,12 @@ export class AppController {
     return this.clientBalanceService.send({ cmd: 'remove_asset' }, payload);
   }
 
+  /**
+   * Get the total balance value in the specified currency
+   * @param userId - The ID of the user
+   * @param currency - The currency for the total balance value
+   * @returns The total balance value
+   */
   @Get('/balances/total')
   async getTotalBalance(
     @Headers('X-User-ID') userId: string,

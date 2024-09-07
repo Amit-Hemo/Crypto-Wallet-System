@@ -6,7 +6,9 @@
     "deleteOutDir": true,
     "webpack": true,
     "tsConfigPath": "apps/api-gateway/tsconfig.app.json",
-    "plugins": ["@nestjs/swagger"]
+    "plugins": [
+      { "name": "@nestjs/swagger", "options": { "introspectComments": true } }
+    ]
   },
   "monorepo": true,
   "root": "apps/api-gateway",
