@@ -20,34 +20,6 @@ export class BalanceService {
     this.logger.setContext(BalanceService.name);
   }
 
-  async getBalance(userId: string): Promise<UserBalance> {
-    try {
-      const data = await this.fileManagementService.readJSON<UserBalance[]>(
-        this.dbFilename,
-      );
-      const userBalance = data.find((balance) => balance.userId === userId);
-      if (!userBalance) {
-        this.logger.error(`User ${userId} is not found in db`);
-        throw new RpcException(
-          new NotFoundException('User does not have balance'),
-        );
-      }
-
-      const message = `Successfully retrieved user balance for ${userId}`;
-      this.logger.log(message);
-
-      return userBalance;
-    } catch (error) {
-      this.logger.error(
-        `Failed to retrieve user balance for ${userId}: ${error?.message ?? ''}`,
-      );
-      if (error instanceof RpcException) {
-        throw error;
-      }
-      throw new RpcException('Failed to retrieve balance to the user');
-    }
-  }
-
   async addAssetToBalance(
     userId: string,
     asset: CryptoAsset,
@@ -157,13 +129,71 @@ export class BalanceService {
     const { rates: rateRecords } = await lastValueFrom(
       this.clientRateService.send<RatesResponse>({ cmd: 'get_rate' }, payload),
     );
-    return this.calculateTotalBalanceValue(rateRecords, assets);
+    const totalBalance = this.calculateTotalBalanceValue(rateRecords, assets);
+    const message = `Successfully calculated total balance value with currency ${currency} to user ${userId}`;
+    this.logger.log(message);
+    return totalBalance;
+  }
+
+  async getBalancesValues(
+    userId: string,
+    currency: string,
+  ): Promise<UserBalance> {
+    const userBalance = await this.getBalance(userId);
+    const assetIds = userBalance.assets.map((asset) => asset.id).join(',');
+    const payload: GetRatePayloadDto = { userId, assetIds, currency };
+    const { rates: rateRecords } = await lastValueFrom(
+      this.clientRateService.send<RatesResponse>({ cmd: 'get_rate' }, payload),
+    );
+    const ratesMap = new Map<string, number>(
+      rateRecords.map((record) => [
+        Object.keys(record)[0],
+        Object.values(record)[0],
+      ]),
+    );
+    for (const asset of userBalance.assets) {
+      if (!ratesMap.has(asset.id)) asset.valueInCurrency = 0;
+      const rate = ratesMap.get(asset.id);
+      asset.valueInCurrency = this.calculateBalanceValue(asset.amount, rate);
+    }
+
+    const message = `Successfully balance values with currency ${currency} to user ${userId}`;
+    this.logger.log(message);
+    return userBalance;
+  }
+
+  private async getBalance(userId: string): Promise<UserBalance> {
+    try {
+      const data = await this.fileManagementService.readJSON<UserBalance[]>(
+        this.dbFilename,
+      );
+      const userBalance = data.find((balance) => balance.userId === userId);
+      if (!userBalance) {
+        this.logger.error(`User ${userId} is not found in db`);
+        throw new RpcException(
+          new NotFoundException('User does not have balance'),
+        );
+      }
+
+      const message = `Successfully retrieved user balance for ${userId}`;
+      this.logger.log(message);
+
+      return userBalance;
+    } catch (error) {
+      this.logger.error(
+        `Failed to retrieve user balance for ${userId}: ${error?.message ?? ''}`,
+      );
+      if (error instanceof RpcException) {
+        throw error;
+      }
+      throw new RpcException('Failed to retrieve balance to the user');
+    }
   }
 
   private calculateTotalBalanceValue(
     ratesRecords: Rate[],
     assets: CryptoAsset[],
-  ) {
+  ): number {
     const ratesMap = new Map<string, number>(
       ratesRecords.map((record) => [
         Object.keys(record)[0],
@@ -179,7 +209,10 @@ export class BalanceService {
 
     return totalBalanceValue;
   }
-  private calculateBalanceValue(amount: number, rateInCurrency: number) {
-    return amount * rateInCurrency;
+  private calculateBalanceValue(
+    amount: number,
+    rateInCurrency: number,
+  ): number {
+    return Number((amount * rateInCurrency).toFixed(2));
   }
 }

@@ -3,7 +3,6 @@ import { SuccessResponse } from '@app/shared/api/responses';
 import { AddAssetPayloadDto } from '@app/shared/dto/add-asset.dto';
 import { BalanceValueDto } from '@app/shared/dto/balance-value.dto';
 import { RemoveAssetPayloadDto } from '@app/shared/dto/remove-asset.dto';
-import { UserIdDto } from '@app/shared/dto/user-id.dto';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { BalanceService } from './balance.service';
@@ -18,12 +17,14 @@ export class BalanceController {
   }
 
   @MessagePattern({ cmd: 'get_balance' })
-  async getBalance(@Payload() payload: UserIdDto) {
-    const { userId } = payload;
+  async getBalancesValues(@Payload() payload: BalanceValueDto) {
+    const { userId, currency } = payload;
     this.logger.log(`Received request to get user balance for ${userId}`);
     try {
-      const userBalance = await this.balanceService.getBalance(userId);
-
+      const userBalance = await this.balanceService.getBalancesValues(
+        userId,
+        currency,
+      );
       const message = `Successfully retrieved user balance for user ${userId}`;
       this.logger.log(message);
       return new SuccessResponse(message, userBalance);

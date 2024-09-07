@@ -4,7 +4,6 @@ import {
   RemoveAssetDto,
   RemoveAssetPayloadDto,
 } from '@app/shared/dto/remove-asset.dto';
-import { UserIdDto } from '@app/shared/dto/user-id.dto';
 import { serviceNames } from '@app/shared/general/service-names';
 import {
   BadRequestException,
@@ -39,8 +38,11 @@ export class AppController {
   }
 
   @Get('/balances/assets')
-  async getBalance(@Headers('X-User-ID') userId: string) {
-    const payload: UserIdDto = { userId };
+  async getBalancesValues(
+    @Headers('X-User-ID') userId: string,
+    @Query('currency') currency: string,
+  ) {
+    const payload: BalanceValueDto = { userId, currency };
     return this.clientBalanceService.send({ cmd: 'get_balance' }, payload).pipe(
       catchError((error) => {
         if (
