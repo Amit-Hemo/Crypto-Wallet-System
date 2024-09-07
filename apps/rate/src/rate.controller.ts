@@ -2,7 +2,7 @@ import { AppLoggerService } from '@app/shared';
 import { GetRatePayloadDto } from '@app/shared/dto/get-rate.dto';
 import { RatesResponse } from '@app/shared/interfaces/rate.interface';
 import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { RateService } from './rate.service';
 
 @Controller('rate')
@@ -28,10 +28,7 @@ export class RateController {
       return response;
     } catch (error) {
       this.logger.error(`Error processing request: ${error.message}`);
-      if (error instanceof RpcException) {
-        throw error;
-      }
-      throw new RpcException('Failed to retrieve rate');
+      throw error;
     }
   }
 }

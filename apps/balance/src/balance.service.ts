@@ -4,7 +4,12 @@ import { serviceNames } from '@app/shared/general/service-names';
 import { CryptoAsset } from '@app/shared/interfaces/asset.interface';
 import { UserBalance } from '@app/shared/interfaces/balance.interface';
 import { Rate, RatesResponse } from '@app/shared/interfaces/rate.interface';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 
@@ -90,7 +95,7 @@ export class BalanceService {
           `Insufficient amount to reduce ${amount} from asset ${assetId} for user ${userId} balance`,
         );
         throw new RpcException(
-          new NotFoundException('Insufficient amount to remove'),
+          new BadRequestException('Insufficient amount to remove'),
         );
       }
 
@@ -183,10 +188,7 @@ export class BalanceService {
       this.logger.error(
         `Failed to retrieve user balance for ${userId}: ${error?.message ?? ''}`,
       );
-      if (error instanceof RpcException) {
-        throw error;
-      }
-      throw new RpcException('Failed to retrieve balance to the user');
+      throw error;
     }
   }
 
@@ -207,7 +209,7 @@ export class BalanceService {
       return prev + this.calculateBalanceValue(amount, rate);
     }, 0);
 
-    return totalBalanceValue;
+    return Number(totalBalanceValue.toFixed(2));
   }
   private calculateBalanceValue(
     amount: number,

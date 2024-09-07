@@ -32,10 +32,7 @@ export class BalanceController {
       this.logger.error(
         `Error processing request for user ${userId}: ${error.message}`,
       );
-      if (error instanceof RpcException) {
-        throw error;
-      }
-      throw new RpcException('Failed to retrieve user balance');
+      throw new RpcException(error);
     }
   }
 
@@ -56,10 +53,7 @@ export class BalanceController {
       this.logger.error(
         `Error processing request for user ${userId}: ${error.message}`,
       );
-      if (error instanceof RpcException) {
-        throw error;
-      }
-      throw new RpcException('Failed to add asset to the user');
+      throw error;
     }
   }
 
@@ -77,10 +71,7 @@ export class BalanceController {
       this.logger.error(
         `Error processing request for user ${userId}: ${error.message}`,
       );
-      if (error instanceof RpcException) {
-        throw error;
-      }
-      throw new RpcException('Failed to remove asset from user balance');
+      throw error;
     }
   }
 
@@ -101,12 +92,7 @@ export class BalanceController {
       this.logger.error(
         `Error processing request for user ${userId}: ${error.message}`,
       );
-      if (error instanceof RpcException) {
-        throw error;
-      }
-      throw new RpcException(
-        'Failed to get total balance value from user balance',
-      );
+      throw new RpcException(error);
     }
   }
 }

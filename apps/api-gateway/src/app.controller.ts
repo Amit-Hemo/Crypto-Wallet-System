@@ -6,14 +6,11 @@ import {
 } from '@app/shared/dto/remove-asset.dto';
 import { serviceNames } from '@app/shared/general/service-names';
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
   Headers,
   Inject,
-  InternalServerErrorException,
-  NotFoundException,
   Param,
   Patch,
   Put,
@@ -21,7 +18,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { catchError, throwError } from 'rxjs';
 import { AuthGuard } from './auth.guard';
 
 @UseGuards(AuthGuard)
@@ -43,17 +39,7 @@ export class AppController {
     @Query('currency') currency: string,
   ) {
     const payload: BalanceValueDto = { userId, currency };
-    return this.clientBalanceService.send({ cmd: 'get_balance' }, payload).pipe(
-      catchError((error) => {
-        if (
-          error instanceof BadRequestException ||
-          error instanceof NotFoundException
-        ) {
-          return throwError(() => error);
-        }
-        return throwError(() => new InternalServerErrorException(error));
-      }),
-    );
+    return this.clientBalanceService.send({ cmd: 'get_balance' }, payload);
   }
 
   @Put('/balances/assets')
@@ -62,14 +48,7 @@ export class AppController {
     @Body() assetDto: AddAssetDto,
   ) {
     const payload: AddAssetPayloadDto = { ...assetDto, userId };
-    return this.clientBalanceService.send({ cmd: 'add_asset' }, payload).pipe(
-      catchError((error) => {
-        if (error instanceof BadRequestException) {
-          return throwError(() => error);
-        }
-        return throwError(() => new InternalServerErrorException(error));
-      }),
-    );
+    return this.clientBalanceService.send({ cmd: 'add_asset' }, payload);
   }
 
   @Patch('/balances/assets/:id')
@@ -79,19 +58,7 @@ export class AppController {
     @Body() body: RemoveAssetDto,
   ) {
     const payload: RemoveAssetPayloadDto = { ...body, id: assetId, userId };
-    return this.clientBalanceService
-      .send({ cmd: 'remove_asset' }, payload)
-      .pipe(
-        catchError((error) => {
-          if (
-            error instanceof BadRequestException ||
-            error instanceof NotFoundException
-          ) {
-            return throwError(() => error);
-          }
-          return throwError(() => new InternalServerErrorException(error));
-        }),
-      );
+    return this.clientBalanceService.send({ cmd: 'remove_asset' }, payload);
   }
 
   @Get('/balances/total')
@@ -100,15 +67,9 @@ export class AppController {
     @Query('currency') currency: string,
   ) {
     const payload: BalanceValueDto = { userId, currency };
-    return this.clientBalanceService
-      .send({ cmd: 'get_total_balance_value' }, payload)
-      .pipe(
-        catchError((error) => {
-          if (error instanceof BadRequestException) {
-            return throwError(() => error);
-          }
-          return throwError(() => new InternalServerErrorException(error));
-        }),
-      );
+    return this.clientBalanceService.send(
+      { cmd: 'get_total_balance_value' },
+      payload,
+    );
   }
 }

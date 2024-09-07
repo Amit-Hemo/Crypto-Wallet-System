@@ -1,6 +1,9 @@
 import { AppLoggerModule, FileManagementModule } from '@app/shared';
+import { AllExceptionsFilter } from '@app/shared/error-handling/http-exception/http-exception.filter';
+import { GlobalRpcExceptionFilter } from '@app/shared/error-handling/rpc-exception/rpc-exception.filter';
 import { serviceNames } from '@app/shared/general/service-names';
 import { Module } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BalanceController } from './balance.controller';
 import { BalanceService } from './balance.service';
@@ -21,6 +24,16 @@ import { BalanceService } from './balance.service';
     ]),
   ],
   controllers: [BalanceController],
-  providers: [BalanceService],
+  providers: [
+    BalanceService,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: GlobalRpcExceptionFilter,
+    },
+  ],
 })
 export class BalanceModule {}

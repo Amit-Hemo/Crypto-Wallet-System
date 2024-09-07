@@ -5,3 +5,15 @@ export class SuccessResponse<T> {
     private readonly data: T | null = null,
   ) {}
 }
+
+export class ErrorResponse {
+  private readonly status: string = 'error';
+  private readonly timestamp: string;
+  constructor(
+    private readonly statusCode: number,
+    private readonly message: string = 'Internal server error',
+    private readonly path: string = '',
+  ) {
+    this.timestamp = new Date().toISOString();
+  }
+}
