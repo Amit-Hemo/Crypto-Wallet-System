@@ -4,6 +4,7 @@ import { serviceNames } from '@app/shared/general/service-names';
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 
 @Module({
@@ -24,6 +25,12 @@ import { AppController } from './app.controller';
           host: 'localhost',
           port: 3002,
         },
+      },
+    ]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 15 * 60 * 1000,
+        limit: 100,
       },
     ]),
   ],
