@@ -28,11 +28,6 @@ export class AppController {
   @Inject(serviceNames.RATE) private readonly clientRateService: ClientProxy;
   constructor() {}
 
-  @Get('/')
-  getHello(): string {
-    return 'hello';
-  }
-
   @Get('/balances/assets')
   async getBalancesValues(
     @Headers('X-User-ID') userId: string,
