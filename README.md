@@ -9,8 +9,8 @@ $ npm install
 ```
 
 ## Architecture
-
-<a href="https://app.eraser.io/workspace/nCeo9GJ8W4I2jVVdPZst?elements=PsIDxAlSMNf4pEHxKFnT9Q">View on Eraser<br /><img src="https://app.eraser.io/workspace/nCeo9GJ8W4I2jVVdPZst/preview?elements=PsIDxAlSMNf4pEHxKFnT9Q&type=embed" width=700 height=450/></a>
+### ** *Please click on the picture and open the document tab for the approach explanation* **
+<a href="https://app.eraser.io/workspace/nCeo9GJ8W4I2jVVdPZst?elements=PsIDxAlSMNf4pEHxKFnT9Q">View on Eraser<br /><img src="https://app.eraser.io/workspace/nCeo9GJ8W4I2jVVdPZst/preview?elements=PsIDxAlSMNf4pEHxKFnT9Q&type=embed" width=750 height=450/></a>
 
 ## Documentation
 
@@ -27,6 +27,7 @@ $ npm run start
 # Start Microservices
 $ nest start balance
 $ nest start rate
+
 # Run tests
 $ npm test
 ```
