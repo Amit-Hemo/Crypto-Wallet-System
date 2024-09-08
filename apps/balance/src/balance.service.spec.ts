@@ -1,29 +1,22 @@
 import { AppLoggerService, FileManagementService } from '@app/shared';
+import { GetRatePayloadDto } from '@app/shared/dto/get-rate.dto';
 import { serviceNames } from '@app/shared/general/service-names';
 import { CryptoAsset } from '@app/shared/interfaces/asset.interface';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { UserBalance } from '@app/shared/interfaces/balance.interface';
+import { RatesResponse } from '@app/shared/interfaces/rate.interface';
+import { ClientProxy } from '@nestjs/microservices';
 import { Test, TestingModule } from '@nestjs/testing';
+import { of } from 'rxjs';
 import { BalanceService } from './balance.service';
 
 describe('BalanceService', () => {
   let service: BalanceService;
   let fileManagementService: FileManagementService;
   let logger: AppLoggerService;
+  let clientRateService: ClientProxy;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        ClientsModule.register([
-          {
-            name: serviceNames.RATE,
-            transport: Transport.TCP,
-            options: {
-              host: 'localhost',
-              port: 3002,
-            },
-          },
-        ]),
-      ],
       providers: [
         BalanceService,
         {
@@ -42,6 +35,12 @@ describe('BalanceService', () => {
             setContext: jest.fn(),
           },
         },
+        {
+          provide: serviceNames.RATE,
+          useValue: {
+            send: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -49,6 +48,7 @@ describe('BalanceService', () => {
     fileManagementService = module.get<FileManagementService>(
       FileManagementService,
     );
+    clientRateService = module.get<ClientProxy>(serviceNames.RATE);
     logger = await module.resolve(AppLoggerService);
   });
 
@@ -178,6 +178,92 @@ describe('BalanceService', () => {
       await expect(
         service.removeAssetFromBalance(userId, assetId, amount),
       ).rejects.toThrow(/amount/i);
+    });
+  });
+
+  describe('getBalancesValues, happy flow', () => {
+    it('should get user balance including the values of the assets', async () => {
+      const userId = 'test_user_1';
+      const currency = 'usd';
+      const assetId = 'bitcoin';
+      const amount = 2;
+      const mockRate = 50000;
+      const ratePayload: GetRatePayloadDto = {
+        userId,
+        assetIds: assetId,
+        currency,
+      };
+
+      // mocking file
+      const existingBalances = [{ userId, assets: [{ id: assetId, amount }] }];
+      jest
+        .spyOn(fileManagementService, 'readJSON')
+        .mockResolvedValue(existingBalances);
+
+      // mocking rate service response
+      const mockRatesResponse: RatesResponse = {
+        rates: [{ [assetId]: mockRate }],
+        currency,
+        cached: 'none',
+      };
+      jest
+        .spyOn(clientRateService, 'send')
+        .mockReturnValue(of(mockRatesResponse));
+
+      const result = await service.getBalancesValues(userId, currency);
+      expect(clientRateService.send).toHaveBeenCalledWith(
+        { cmd: 'get_rate' },
+        ratePayload,
+      );
+      expect(result).toEqual<UserBalance>({
+        userId,
+        assets: [{ id: assetId, amount, valueInCurrency: mockRate * amount }],
+      });
+    });
+  });
+
+  describe('getTotalBalance, happy flow', () => {
+    it('should get user total balance value', async () => {
+      const userId = 'test_user_1';
+      const currency = 'usd';
+      const mockRateBitcoin = 50000;
+      const mockRateEthereum = 2000;
+      const ratePayload: GetRatePayloadDto = {
+        userId,
+        assetIds: 'bitcoin,ethereum',
+        currency,
+      };
+
+      // mocking file
+      const existingBalances = [
+        {
+          userId,
+          assets: [
+            { id: 'bitcoin', amount: 2 },
+            { id: 'ethereum', amount: 5 },
+          ],
+        },
+      ];
+      jest
+        .spyOn(fileManagementService, 'readJSON')
+        .mockResolvedValue(existingBalances);
+
+      // mocking rate service response
+      const mockRatesResponse: RatesResponse = {
+        rates: [{ bitcoin: mockRateBitcoin }, { ethereum: mockRateEthereum }],
+        currency,
+        cached: 'none',
+      };
+      jest
+        .spyOn(clientRateService, 'send')
+        .mockReturnValue(of(mockRatesResponse));
+
+      const result = await service.getTotalBalance(userId, currency);
+      expect(clientRateService.send).toHaveBeenCalledWith(
+        { cmd: 'get_rate' },
+        ratePayload,
+      );
+      expect(result).toEqual(110000);
     });
   });
 });
