@@ -27,4 +27,7 @@ $ npm run start
 # Start Microservices
 $ nest start balance
 $ nest start rate
+# Run tests
+$ npm test
 ```
+

@@ -1,7 +1,7 @@
-import { RpcExceptionFilter } from './rpc-exception.filter';
+import { GlobalRpcExceptionFilter } from './rpc-exception.filter';
 
-describe('RpcExceptionFilter', () => {
+describe('GlobalRpcExceptionFilter', () => {
   it('should be defined', () => {
-    expect(new RpcExceptionFilter()).toBeDefined();
+    expect(new GlobalRpcExceptionFilter()).toBeDefined();
   });
 });
