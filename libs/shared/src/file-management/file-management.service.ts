@@ -14,16 +14,23 @@ export class FileManagementService {
     });
   }
 
+  async createDB(name: string) {
+    try {
+      await fs.access(path.join(this.DATA_DIR_PATH, `${name}.json`));
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        await this.writeJSON(name, []);
+        console.log('DB file is not exist, created new db file');
+      } else throw new Error('Error accessing file system');
+    }
+  }
+
   async readJSON<T extends object>(filename: string): Promise<T | null> {
     const filePath = path.join(this.DATA_DIR_PATH, `${filename}.json`);
     try {
       const data = await fs.readFile(filePath, 'utf-8');
       return JSON.parse(data) as T;
     } catch (error) {
-      if (error.code === 'ENOENT') {
-        console.warn(`File not found: ${filePath}`);
-        return null;
-      }
       console.error(`Error reading file: ${filePath}`, error);
       throw new Error(`Error reading file: ${filePath}`);
     }

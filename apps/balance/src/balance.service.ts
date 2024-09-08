@@ -23,6 +23,7 @@ export class BalanceService {
     @Inject(serviceNames.RATE) private readonly clientRateService: ClientProxy,
   ) {
     this.logger.setContext(BalanceService.name);
+    this.fileManagementService.createDB(this.dbFilename);
   }
 
   async addAssetToBalance(
