@@ -23,6 +23,7 @@ describe('BalanceService', () => {
           useValue: {
             readJSON: jest.fn(),
             writeJSON: jest.fn(),
+            createDB: jest.fn(),
           },
         },
         {
