@@ -131,6 +131,9 @@ export class BalanceService {
 
   async getTotalBalance(userId: string, currency: string): Promise<number> {
     const { assets } = await this.getBalance(userId);
+
+    if (assets.length === 0) return 0;
+
     const assetIds = assets.map((asset) => asset.id).join(',');
     const payload: GetRatePayloadDto = { userId, assetIds, currency };
     const { rates: rateRecords } = await lastValueFrom(
@@ -147,6 +150,9 @@ export class BalanceService {
     currency: string,
   ): Promise<UserBalance> {
     const userBalance = await this.getBalance(userId);
+
+    if (userBalance.assets.length === 0) return { userId, assets: [] };
+
     const assetIds = userBalance.assets.map((asset) => asset.id).join(',');
     const payload: GetRatePayloadDto = { userId, assetIds, currency };
     const { rates: rateRecords } = await lastValueFrom(
