@@ -12,7 +12,6 @@ import { BalanceService } from './balance.service';
 describe('BalanceService', () => {
   let service: BalanceService;
   let fileManagementService: FileManagementService;
-  let logger: AppLoggerService;
   let clientRateService: ClientProxy;
 
   beforeEach(async () => {
@@ -49,7 +48,6 @@ describe('BalanceService', () => {
       FileManagementService,
     );
     clientRateService = module.get<ClientProxy>(serviceNames.RATE);
-    logger = await module.resolve(AppLoggerService);
   });
 
   describe('addAssetToBalance, happy flows', () => {
