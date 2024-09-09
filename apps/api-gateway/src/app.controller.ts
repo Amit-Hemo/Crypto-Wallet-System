@@ -1,6 +1,10 @@
 import { AddAssetDto, AddAssetPayloadDto } from '@app/shared/dto/add-asset.dto';
 import { BalanceValueDto } from '@app/shared/dto/balance-value.dto';
 import {
+  RebalancePayloadDto,
+  TargetPercentagesDto,
+} from '@app/shared/dto/rebalance.dto';
+import {
   RemoveAssetDto,
   RemoveAssetPayloadDto,
 } from '@app/shared/dto/remove-asset.dto';
@@ -89,5 +93,26 @@ export class AppController {
       { cmd: 'get_total_balance_value' },
       payload,
     );
+  }
+
+  /**
+   * Adjusts the user's holdings to match specified target percentages of total value across all assets
+   * @param userId The ID of the user
+   * @param currency The currency for the total balance value
+   * @param targetPercentages This is how the selected assets should be adjusted
+   */
+  @Put('balances/rebalance')
+  async rebalance(
+    @Headers('X-User-ID') userId: string,
+    @Query('currency') currency: string,
+    @Body() targetPercentages: TargetPercentagesDto,
+  ) {
+    const payload: RebalancePayloadDto = {
+      userId,
+      currency: currency || 'usd',
+      targetPercentages: targetPercentages.targetPercentages,
+    };
+
+    return this.clientBalanceService.send({ cmd: 'rebalance' }, payload);
   }
 }

@@ -166,7 +166,10 @@ export class BalanceService {
       ]),
     );
     for (const asset of userBalance.assets) {
-      if (!ratesMap.has(asset.id)) asset.valueInCurrency = 0;
+      if (!ratesMap.has(asset.id)) {
+        asset.valueInCurrency = 0;
+        break;
+      }
       const rate = ratesMap.get(asset.id);
       asset.valueInCurrency = this.calculateBalanceValue(asset.amount, rate);
     }
@@ -174,6 +177,81 @@ export class BalanceService {
     const message = `Successfully balance values with currency ${currency} to user ${userId}`;
     this.logger.log(message);
     return userBalance;
+  }
+
+  async rebalance(
+    userId: string,
+    currency: string,
+    targetPercentages: Record<string, number>,
+  ): Promise<void> {
+    const { assets } = await this.getBalancesValues(userId, currency);
+    console.log(assets);
+    if (assets.length === 0) {
+      this.logger.error('There are no values to rebalance');
+      throw new RpcException(new NotFoundException('Nothing to rebalance'));
+    }
+
+    const assetsToRebalance = assets.filter(
+      (asset) => asset.id in targetPercentages,
+    );
+    if (assetsToRebalance.length < assets.length) {
+      this.logger.warn(
+        'Some assets are not included in the rebalance process and will be ignored',
+      );
+    }
+
+    if (assetsToRebalance.length < Object.keys(targetPercentages).length) {
+      this.logger.error(
+        "There are assets from target percentages that are not in user's balance",
+      );
+      throw new RpcException(
+        new BadRequestException(
+          'Please include only assets you have in the percentages',
+        ),
+      );
+    }
+    const invalidAssetIds = assetsToRebalance
+      .filter((asset) => asset.valueInCurrency === 0)
+      .map((asset) => asset.id);
+
+    if (invalidAssetIds.length > 0) {
+      this.logger.error('Invalid assets to be rebalanced');
+      throw new RpcException(
+        new BadRequestException(
+          `Cannot rebalance. The following assets have no value: ${invalidAssetIds.join(',')}`,
+        ),
+      );
+    }
+
+    const totalValue = assetsToRebalance.reduce(
+      (total, { valueInCurrency }) => {
+        return total + valueInCurrency;
+      },
+      0,
+    );
+
+    for (const asset of assetsToRebalance) {
+      const targetPercentage = targetPercentages[asset.id];
+      const targetValue = totalValue * (targetPercentage / 100);
+      const rate = asset.valueInCurrency / asset.amount;
+      const newAmount = targetValue / rate;
+      const deltaToChange = Math.abs(asset.amount - newAmount);
+      if (newAmount > asset.amount) {
+        this.logger.log(
+          `Increasing asset ${asset.id} for user ${userId} by ${deltaToChange} units.`,
+        );
+        await this.addAssetToBalance(userId, {
+          id: asset.id,
+          amount: deltaToChange,
+        });
+      } else {
+        this.logger.log(
+          `Decreasing asset ${asset.id} for user ${userId} by ${deltaToChange} units.`,
+        );
+        await this.removeAssetFromBalance(userId, asset.id, deltaToChange);
+      }
+    }
+    this.logger.log(`Rebalance completed successfully for user ${userId}.`);
   }
 
   private async getBalance(userId: string): Promise<UserBalance> {

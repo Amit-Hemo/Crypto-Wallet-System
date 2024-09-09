@@ -2,6 +2,7 @@ import { AppLoggerService } from '@app/shared';
 import { SuccessResponse } from '@app/shared/api/responses';
 import { AddAssetPayloadDto } from '@app/shared/dto/add-asset.dto';
 import { BalanceValueDto } from '@app/shared/dto/balance-value.dto';
+import { RebalancePayloadDto } from '@app/shared/dto/rebalance.dto';
 import { RemoveAssetPayloadDto } from '@app/shared/dto/remove-asset.dto';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
@@ -89,6 +90,25 @@ export class BalanceController {
       const message = `Successfully calculated total balance value for user ${userId}`;
       this.logger.log(message);
       return new SuccessResponse(message, totalBalance);
+    } catch (error) {
+      this.logger.error(
+        `Error processing request for user ${userId}: ${error.message}`,
+      );
+      if (error instanceof RpcException) throw error;
+      throw new RpcException(error);
+    }
+  }
+
+  @MessagePattern({ cmd: 'rebalance' })
+  async rebalance(@Payload() payload: RebalancePayloadDto) {
+    const { userId, currency, targetPercentages } = payload;
+    this.logger.log(`Received request to rebalance from user ${userId}`);
+    try {
+      await this.balanceService.rebalance(userId, currency, targetPercentages);
+
+      const message = `Successfully rebalanced user ${userId} balance`;
+      this.logger.log(message);
+      return new SuccessResponse(message);
     } catch (error) {
       this.logger.error(
         `Error processing request for user ${userId}: ${error.message}`,
