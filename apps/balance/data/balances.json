@@ -1,1 +1,1 @@
-[{"userId":"user_789","assets":[{"id":"bitcoin","amount":54},{"id":"ethereums","amount":10}]},{"userId":"user_123","assets":[{"amount":1,"id":"bitcoin"}]},{"userId":"user_456","assets":[{"id":"bitcoin","amount":130}]}]
+[{"userId":"user_789","assets":[{"id":"bitcoin","amount":43.535092397520124},{"id":"ethereum","amount":259.83933219437296}]},{"userId":"user_123","assets":[{"amount":1,"id":"bitcoin"}]},{"userId":"user_456","assets":[{"id":"bitcoin","amount":130}]}]

@@ -3,7 +3,7 @@ import { GetRatePayloadDto } from '@app/shared/dto/get-rate.dto';
 import { serviceNames } from '@app/shared/general/service-names';
 import { CryptoAsset } from '@app/shared/interfaces/asset.interface';
 import { UserBalance } from '@app/shared/interfaces/balance.interface';
-import { Rate, RatesResponse } from '@app/shared/interfaces/rate.interface';
+import { RatesResponse } from '@app/shared/interfaces/rate.interface';
 import {
   BadRequestException,
   Inject,
@@ -131,16 +131,9 @@ export class BalanceService {
   }
 
   async getTotalBalance(userId: string, currency: string): Promise<number> {
-    const { assets } = await this.getBalance(userId);
-
+    const { assets } = await this.getBalancesValues(userId, currency);
     if (assets.length === 0) return 0;
-
-    const assetIds = assets.map((asset) => asset.id).join(',');
-    const payload: GetRatePayloadDto = { userId, assetIds, currency };
-    const { rates: rateRecords } = await lastValueFrom(
-      this.clientRateService.send<RatesResponse>({ cmd: 'get_rate' }, payload),
-    );
-    const totalBalance = this.calculateTotalBalanceValue(rateRecords, assets);
+    const totalBalance = this.calculateTotalBalanceValue(assets);
     const message = `Successfully calculated total balance value with currency ${currency} to user ${userId}`;
     this.logger.log(message);
     return totalBalance;
@@ -223,12 +216,7 @@ export class BalanceService {
       );
     }
 
-    const totalValue = assetsToRebalance.reduce(
-      (total, { valueInCurrency }) => {
-        return total + valueInCurrency;
-      },
-      0,
-    );
+    const totalValue = this.calculateTotalBalanceValue(assetsToRebalance);
 
     for (const asset of assetsToRebalance) {
       const targetPercentage = targetPercentages[asset.id];
@@ -281,24 +269,12 @@ export class BalanceService {
     }
   }
 
-  private calculateTotalBalanceValue(
-    ratesRecords: Rate[],
-    assets: CryptoAsset[],
-  ): number {
-    const ratesMap = new Map<string, number>(
-      ratesRecords.map((record) => [
-        Object.keys(record)[0],
-        Object.values(record)[0],
-      ]),
-    );
-    const totalBalanceValue = assets.reduce((prev, currAsset) => {
-      const { id, amount } = currAsset;
-      if (!ratesMap.has(id)) return prev;
-      const rate = ratesMap.get(id);
-      return prev + this.calculateBalanceValue(amount, rate);
+  private calculateTotalBalanceValue(assets: CryptoAsset[]): number {
+    const totalValue = assets.reduce((total, { valueInCurrency }) => {
+      return total + valueInCurrency;
     }, 0);
 
-    return Number(totalBalanceValue.toFixed(2));
+    return Number(totalValue.toFixed(2));
   }
   private calculateBalanceValue(
     amount: number,
