@@ -25,8 +25,8 @@ Once the application is running you can visit http://localhost:3000/api to see t
 $ npm run start
 
 # Start Microservices
-$ nest start balance
-$ nest start rate
+$ npm run start:balance
+$ npm run start:rate
 
 # Run tests
 $ npm test
