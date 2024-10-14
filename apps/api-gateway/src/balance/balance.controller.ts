@@ -8,8 +8,8 @@ import {
   RemoveAssetDto,
   RemoveAssetPayloadDto,
 } from '@app/shared/dto/remove-asset.dto';
-import { Routes } from '@app/shared/general/routes.constants';
 import { MessagePatterns } from '@app/shared/general/message-patterns.constants';
+import { Routes } from '@app/shared/general/routes.constants';
 import { Services } from '@app/shared/general/services.contants';
 import {
   Body,
@@ -24,11 +24,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { AuthGuard } from './auth.guard';
+import { AuthGuard } from '../auth.guard';
 
 @UseGuards(AuthGuard)
-@Controller()
-export class AppController {
+@Controller(Routes.BALANCES)
+export class BalanceController {
   @Inject(Services.BALANCE)
   private readonly clientBalanceService: ClientProxy;
   @Inject(Services.RATE) private readonly clientRateService: ClientProxy;
@@ -40,7 +40,7 @@ export class AppController {
    * @param currency - The currency for which to retrieve the balance values
    * @returns User balance
    */
-  @Get(`/${Routes.BALANCES}/assets`)
+  @Get('assets')
   async getBalancesValues(
     @Headers('X-User-ID') userId: string,
     @Query('currency') currency: string,
@@ -57,7 +57,7 @@ export class AppController {
    * @param userId - The ID of the user
    * @param assetDto - The asset data
    */
-  @Put(`/${Routes.BALANCES}/assets`)
+  @Put('assets')
   async addAssetToBalance(
     @Headers('X-User-ID') userId: string,
     @Body() assetDto: AddAssetDto,
@@ -75,7 +75,7 @@ export class AppController {
    * @param assetId - The ID of the asset to remove
    * @param body - The amount to remove
    */
-  @Patch(`/${Routes.BALANCES}/assets/:id`)
+  @Patch('assets/:id')
   async removeAssetFromBalance(
     @Headers('X-User-ID') userId: string,
     @Param('id') assetId: string,
@@ -94,7 +94,7 @@ export class AppController {
    * @param currency - The currency for the total balance value
    * @returns The total balance value
    */
-  @Get(`/${Routes.BALANCES}/total`)
+  @Get('total')
   async getTotalBalance(
     @Headers('X-User-ID') userId: string,
     @Query('currency') currency: string,
@@ -112,7 +112,7 @@ export class AppController {
    * @param currency The currency for the total balance value
    * @param targetPercentages This is how the selected assets should be adjusted
    */
-  @Put(`/${Routes.BALANCES}/rebalance`)
+  @Put('rebalance')
   async rebalance(
     @Headers('X-User-ID') userId: string,
     @Query('currency') currency: string,

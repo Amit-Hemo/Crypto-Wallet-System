@@ -5,7 +5,7 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { AppController } from './app.controller';
+import { BalanceController } from './balance/balance.controller';
 
 @Module({
   imports: [
@@ -34,7 +34,7 @@ import { AppController } from './app.controller';
       },
     ]),
   ],
-  controllers: [AppController],
+  controllers: [BalanceController],
   providers: [
     {
       provide: APP_FILTER,
