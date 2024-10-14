@@ -1,6 +1,6 @@
 import { AllExceptionsFilter } from '@app/shared/error-handling/http-exception/http-exception.filter';
 import { GlobalRpcExceptionFilter } from '@app/shared/error-handling/rpc-exception/rpc-exception.filter';
-import { serviceNames } from '@app/shared/general/service-names';
+import { Services } from '@app/shared/general/services.contants';
 import { Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -11,7 +11,7 @@ import { AppController } from './app.controller';
   imports: [
     ClientsModule.register([
       {
-        name: serviceNames.BALANCE,
+        name: Services.BALANCE,
         transport: Transport.TCP,
         options: {
           host: 'localhost',
@@ -19,7 +19,7 @@ import { AppController } from './app.controller';
         },
       },
       {
-        name: serviceNames.RATE,
+        name: Services.RATE,
         transport: Transport.TCP,
         options: {
           host: 'localhost',

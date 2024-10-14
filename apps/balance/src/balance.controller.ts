@@ -4,6 +4,7 @@ import { AddAssetPayloadDto } from '@app/shared/dto/add-asset.dto';
 import { BalanceValueDto } from '@app/shared/dto/balance-value.dto';
 import { RebalancePayloadDto } from '@app/shared/dto/rebalance.dto';
 import { RemoveAssetPayloadDto } from '@app/shared/dto/remove-asset.dto';
+import { MessagePatterns } from '@app/shared/general/message-patterns.constants';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { BalanceService } from './balance.service';
@@ -17,7 +18,7 @@ export class BalanceController {
     logger.setContext(BalanceController.name);
   }
 
-  @MessagePattern({ cmd: 'get_balance' })
+  @MessagePattern({ cmd: MessagePatterns.GET_BALANCE })
   async getBalancesValues(@Payload() payload: BalanceValueDto) {
     const { userId, currency } = payload;
     this.logger.log(`Received request to get user balance for ${userId}`);
@@ -38,7 +39,7 @@ export class BalanceController {
     }
   }
 
-  @MessagePattern({ cmd: 'add_asset' })
+  @MessagePattern({ cmd: MessagePatterns.ADD_ASSET })
   async addAssetToBalance(@Payload() payload: AddAssetPayloadDto) {
     const { userId, ...asset } = payload;
     this.logger.log(`Received request to add/update asset for user ${userId}`);
@@ -59,7 +60,7 @@ export class BalanceController {
     }
   }
 
-  @MessagePattern({ cmd: 'remove_asset' })
+  @MessagePattern({ cmd: MessagePatterns.REMOVE_ASSET })
   async removeAssetFromBalance(@Payload() payload: RemoveAssetPayloadDto) {
     const { userId, id: assetId, amount } = payload;
     this.logger.log(`Received request to remove asset for user ${userId}`);
@@ -77,7 +78,7 @@ export class BalanceController {
     }
   }
 
-  @MessagePattern({ cmd: 'get_total_balance_value' })
+  @MessagePattern({ cmd: MessagePatterns.GET_TOTAL_BALANCE_VALUE })
   async getTotalBalance(@Payload() payload: BalanceValueDto) {
     const { userId, currency } = payload;
     this.logger.log(`Received request get total balance for user ${userId}`);
@@ -99,7 +100,7 @@ export class BalanceController {
     }
   }
 
-  @MessagePattern({ cmd: 'rebalance' })
+  @MessagePattern({ cmd: MessagePatterns.REBALANCE })
   async rebalance(@Payload() payload: RebalancePayloadDto) {
     const { userId, currency, targetPercentages } = payload;
     this.logger.log(`Received request to rebalance from user ${userId}`);

@@ -8,7 +8,9 @@ import {
   RemoveAssetDto,
   RemoveAssetPayloadDto,
 } from '@app/shared/dto/remove-asset.dto';
-import { serviceNames } from '@app/shared/general/service-names';
+import { Routes } from '@app/shared/general/routes.constants';
+import { MessagePatterns } from '@app/shared/general/message-patterns.constants';
+import { Services } from '@app/shared/general/services.contants';
 import {
   Body,
   Controller,
@@ -27,9 +29,9 @@ import { AuthGuard } from './auth.guard';
 @UseGuards(AuthGuard)
 @Controller()
 export class AppController {
-  @Inject(serviceNames.BALANCE)
+  @Inject(Services.BALANCE)
   private readonly clientBalanceService: ClientProxy;
-  @Inject(serviceNames.RATE) private readonly clientRateService: ClientProxy;
+  @Inject(Services.RATE) private readonly clientRateService: ClientProxy;
   constructor() {}
 
   /**
@@ -38,13 +40,16 @@ export class AppController {
    * @param currency - The currency for which to retrieve the balance values
    * @returns User balance
    */
-  @Get('/balances/assets')
+  @Get(`/${Routes.BALANCES}/assets`)
   async getBalancesValues(
     @Headers('X-User-ID') userId: string,
     @Query('currency') currency: string,
   ) {
     const payload: BalanceValueDto = { userId, currency };
-    return this.clientBalanceService.send({ cmd: 'get_balance' }, payload);
+    return this.clientBalanceService.send(
+      { cmd: MessagePatterns.GET_BALANCE },
+      payload,
+    );
   }
 
   /**
@@ -52,13 +57,16 @@ export class AppController {
    * @param userId - The ID of the user
    * @param assetDto - The asset data
    */
-  @Put('/balances/assets')
+  @Put(`/${Routes.BALANCES}/assets`)
   async addAssetToBalance(
     @Headers('X-User-ID') userId: string,
     @Body() assetDto: AddAssetDto,
   ) {
     const payload: AddAssetPayloadDto = { ...assetDto, userId };
-    return this.clientBalanceService.send({ cmd: 'add_asset' }, payload);
+    return this.clientBalanceService.send(
+      { cmd: MessagePatterns.ADD_ASSET },
+      payload,
+    );
   }
 
   /**
@@ -67,14 +75,17 @@ export class AppController {
    * @param assetId - The ID of the asset to remove
    * @param body - The amount to remove
    */
-  @Patch('/balances/assets/:id')
+  @Patch(`/${Routes.BALANCES}/assets/:id`)
   async removeAssetFromBalance(
     @Headers('X-User-ID') userId: string,
     @Param('id') assetId: string,
     @Body() body: RemoveAssetDto,
   ) {
     const payload: RemoveAssetPayloadDto = { ...body, id: assetId, userId };
-    return this.clientBalanceService.send({ cmd: 'remove_asset' }, payload);
+    return this.clientBalanceService.send(
+      { cmd: MessagePatterns.REMOVE_ASSET },
+      payload,
+    );
   }
 
   /**
@@ -83,14 +94,14 @@ export class AppController {
    * @param currency - The currency for the total balance value
    * @returns The total balance value
    */
-  @Get('/balances/total')
+  @Get(`/${Routes.BALANCES}/total`)
   async getTotalBalance(
     @Headers('X-User-ID') userId: string,
     @Query('currency') currency: string,
   ) {
     const payload: BalanceValueDto = { userId, currency };
     return this.clientBalanceService.send(
-      { cmd: 'get_total_balance_value' },
+      { cmd: MessagePatterns.GET_TOTAL_BALANCE_VALUE },
       payload,
     );
   }
@@ -101,7 +112,7 @@ export class AppController {
    * @param currency The currency for the total balance value
    * @param targetPercentages This is how the selected assets should be adjusted
    */
-  @Put('balances/rebalance')
+  @Put(`/${Routes.BALANCES}/rebalance`)
   async rebalance(
     @Headers('X-User-ID') userId: string,
     @Query('currency') currency: string,
@@ -113,6 +124,9 @@ export class AppController {
       targetPercentages: targetPercentages.targetPercentages,
     };
 
-    return this.clientBalanceService.send({ cmd: 'rebalance' }, payload);
+    return this.clientBalanceService.send(
+      { cmd: MessagePatterns.REBALANCE },
+      payload,
+    );
   }
 }

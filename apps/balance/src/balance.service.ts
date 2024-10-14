@@ -1,6 +1,7 @@
 import { AppLoggerService, FileManagementService } from '@app/shared';
 import { GetRatePayloadDto } from '@app/shared/dto/get-rate.dto';
-import { serviceNames } from '@app/shared/general/service-names';
+import { MessagePatterns } from '@app/shared/general/message-patterns.constants';
+import { Services } from '@app/shared/general/services.contants';
 import { CryptoAsset } from '@app/shared/interfaces/asset.interface';
 import { UserBalance } from '@app/shared/interfaces/balance.interface';
 import { RatesResponse } from '@app/shared/interfaces/rate.interface';
@@ -20,7 +21,7 @@ export class BalanceService {
   constructor(
     private readonly fileManagementService: FileManagementService,
     private readonly logger: AppLoggerService,
-    @Inject(serviceNames.RATE) private readonly clientRateService: ClientProxy,
+    @Inject(Services.RATE) private readonly clientRateService: ClientProxy,
   ) {
     this.logger.setContext(BalanceService.name);
     this.fileManagementService.createDB(this.dbFilename);
@@ -150,7 +151,10 @@ export class BalanceService {
     const assetIds = userBalance.assets.map((asset) => asset.id).join(',');
     const payload: GetRatePayloadDto = { userId, assetIds, currency };
     const { rates: rateRecords } = await lastValueFrom(
-      this.clientRateService.send<RatesResponse>({ cmd: 'get_rate' }, payload),
+      this.clientRateService.send<RatesResponse>(
+        { cmd: MessagePatterns.GET_RATE },
+        payload,
+      ),
     );
     const ratesMap = new Map<string, number>(
       rateRecords.map((record) => [

@@ -1,5 +1,6 @@
 import { AppLoggerService } from '@app/shared';
 import { GetRatePayloadDto } from '@app/shared/dto/get-rate.dto';
+import { MessagePatterns } from '@app/shared/general/message-patterns.constants';
 import { RatesResponse } from '@app/shared/interfaces/rate.interface';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
@@ -14,7 +15,7 @@ export class RateController {
     logger.setContext(RateController.name);
   }
 
-  @MessagePattern({ cmd: 'get_rate' })
+  @MessagePattern({ cmd: MessagePatterns.GET_RATE })
   async getCryptoRate(@Payload() data: GetRatePayloadDto) {
     const { assetIds, currency } = data;
     this.logger.log(`Received request to retrieve rate`);

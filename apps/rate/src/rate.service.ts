@@ -113,7 +113,7 @@ export class RateService {
             return throwError(
               () =>
                 new RpcException(
-                  'An error happened when connection to coin gecko API',
+                  'An error happened when connecting to coin gecko API',
                 ),
             );
           }),
@@ -126,7 +126,7 @@ export class RateService {
     const fetchedResults: Rate[] = [];
     for (const [assetId, rateCurrencyPair] of Object.entries(data)) {
       const isEmpty = Object.keys(rateCurrencyPair).length === 0;
-      //NOTE: CoinGecko API omits Rate-Curreny pairs inside for every asset when currency is invalid, so I stop here
+      // CoinGecko API omits Rate-Curreny pairs inside for all assets when currency is invalid, so I stop here
       if (isEmpty) break;
       fetchedResults.push({ [assetId]: rateCurrencyPair[currency] });
     }

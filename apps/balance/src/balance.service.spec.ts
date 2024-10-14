@@ -1,6 +1,6 @@
 import { AppLoggerService, FileManagementService } from '@app/shared';
 import { GetRatePayloadDto } from '@app/shared/dto/get-rate.dto';
-import { serviceNames } from '@app/shared/general/service-names';
+import { Services } from '@app/shared/general/services.contants';
 import { CryptoAsset } from '@app/shared/interfaces/asset.interface';
 import { UserBalance } from '@app/shared/interfaces/balance.interface';
 import { RatesResponse } from '@app/shared/interfaces/rate.interface';
@@ -36,7 +36,7 @@ describe('BalanceService', () => {
           },
         },
         {
-          provide: serviceNames.RATE,
+          provide: Services.RATE,
           useValue: {
             send: jest.fn(),
           },
@@ -48,7 +48,7 @@ describe('BalanceService', () => {
     fileManagementService = module.get<FileManagementService>(
       FileManagementService,
     );
-    clientRateService = module.get<ClientProxy>(serviceNames.RATE);
+    clientRateService = module.get<ClientProxy>(Services.RATE);
   });
 
   describe('addAssetToBalance, happy flows', () => {
