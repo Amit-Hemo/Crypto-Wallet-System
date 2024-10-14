@@ -24,14 +24,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth.guard';
 
+@ApiTags('balance')
 @UseGuards(AuthGuard)
 @Controller(Routes.BALANCES)
 export class BalanceController {
   @Inject(Services.BALANCE)
   private readonly clientBalanceService: ClientProxy;
-  @Inject(Services.RATE) private readonly clientRateService: ClientProxy;
   constructor() {}
 
   /**
