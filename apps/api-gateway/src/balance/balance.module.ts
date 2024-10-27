@@ -10,7 +10,7 @@ import { BalanceController } from './balance.controller';
         name: Services.BALANCE,
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
+          host: 'balance-service',
           port: 3001,
         },
       },

@@ -1,3 +1,4 @@
+import { AppLoggerService } from '@app/shared';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -19,6 +20,11 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(3000);
+  const PORT = (process.env.PORT || 3000) as number;
+  const logger = new AppLoggerService();
+  logger.setContext(AppModule.name);
+  await app.listen(3000, () => {
+    logger.log(`Listening on port ${PORT}`);
+  });
 }
 bootstrap();

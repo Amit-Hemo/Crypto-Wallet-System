@@ -14,7 +14,7 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
-        host: 'localhost',
+        host: 'rate-service',
         port: 3002,
       },
       bufferLogs: true,

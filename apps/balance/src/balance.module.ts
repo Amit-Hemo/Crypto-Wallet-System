@@ -17,7 +17,7 @@ import { BalanceService } from './balance.service';
         name: Services.RATE,
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
+          host: 'rate-service',
           port: 3002,
         },
       },

@@ -1,0 +1,66 @@
+services:
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: .
+      dockerfile: ./apps/api-gateway/Dockerfile
+    environment:
+      NODE_ENV: development
+    ports:
+      - 3000:3000
+
+  balance-service:
+    container_name: balance-service
+    build:
+      context: .
+      dockerfile: ./apps/balance/Dockerfile
+    environment:
+      NODE_ENV: development
+    ports:
+      - 3001:3001
+
+  rate-service:
+    container_name: rate-service
+    build:
+      context: .
+      dockerfile: ./apps/rate/Dockerfile
+    environment:
+      NODE_ENV: development
+    env_file:
+      - ./apps/rate/.env
+    ports:
+      - 3002:3002
+      
+# The commented out section below is an example of how to define a PostgreSQL
+# database that your application can use. `depends_on` tells Docker Compose to
+# start the database before your application. The `db-data` volume persists the
+# database data between container restarts. The `db-password` secret is used
+# to set the database password. You must create `db/password.txt` and add
+# a password of your choosing to it before running `docker-compose up`.
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#   db:
+#     image: postgres
+#     restart: always
+#     user: postgres
+#     secrets:
+#       - db-password
+#     volumes:
+#       - db-data:/var/lib/postgresql/data
+#     environment:
+#       - POSTGRES_DB=example
+#       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+#     expose:
+#       - 5432
+#     healthcheck:
+#       test: [ "CMD", "pg_isready" ]
+#       interval: 10s
+#       timeout: 5s
+#       retries: 5
+# volumes:
+#   db-data:
+# secrets:
+#   db-password:
+#     file: db/password.txt
+

@@ -14,7 +14,7 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
-        host: 'localhost',
+        host: 'balance-service',
         port: 3001,
       },
       bufferLogs: true,
