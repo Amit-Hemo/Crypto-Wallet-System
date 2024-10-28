@@ -9,13 +9,13 @@ async function bootstrap() {
   app.setGlobalPrefix('/api/v1');
   app.enableCors();
   app.use(helmet());
+
   const options = new DocumentBuilder()
     .setTitle('Crypto Balance System')
     .setDescription(
       'The system will allow users to manage their crypto holdings and view current valuations.',
     )
     .setVersion('1.0')
-    .addTag('balance')
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
