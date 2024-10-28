@@ -1,5 +1,6 @@
 import { AppLoggerService } from '@app/shared';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import {
   MicroserviceOptions,
@@ -9,17 +10,17 @@ import {
 import { RateModule } from './rate.module';
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    RateModule,
-    {
-      transport: Transport.TCP,
-      options: {
-        host: 'rate-service',
-        port: (process.env.PORT || 3002) as number,
-      },
-      bufferLogs: true,
+  const app = await NestFactory.create(RateModule, { bufferLogs: true });
+  const configService = app.get(ConfigService);
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.TCP,
+    options: {
+      host: 'rate-service',
+      port: configService.get<number>('PORT'),
     },
-  );
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       forbidUnknownValues: true,
@@ -30,7 +31,7 @@ async function bootstrap() {
   const logger = await app.resolve(AppLoggerService);
   app.useLogger(logger);
 
-  await app.listen();
+  await app.startAllMicroservices();
   logger.log('Rate service is listening for requests.');
 }
 bootstrap();

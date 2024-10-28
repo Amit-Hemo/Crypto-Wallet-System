@@ -1,5 +1,6 @@
 import { AppLoggerService } from '@app/shared';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import {
   MicroserviceOptions,
@@ -9,17 +10,16 @@ import {
 import { BalanceModule } from './balance.module';
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    BalanceModule,
-    {
-      transport: Transport.TCP,
-      options: {
-        host: 'balance-service',
-        port: (process.env.PORT || 3001) as number,
-      },
-      bufferLogs: true,
+  const app = await NestFactory.create(BalanceModule, { bufferLogs: true });
+  const configService = app.get(ConfigService);
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.TCP,
+    options: {
+      host: 'balance-service',
+      port: configService.get<number>('PORT'),
     },
-  );
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -32,7 +32,7 @@ async function bootstrap() {
   const logger = await app.resolve(AppLoggerService);
   app.useLogger(logger);
 
-  await app.listen();
+  await app.startAllMicroservices();
   logger.log('Balance service is listening for requests.');
 }
 bootstrap();

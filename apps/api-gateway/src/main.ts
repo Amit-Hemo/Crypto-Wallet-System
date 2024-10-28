@@ -1,4 +1,5 @@
 import { AppLoggerService } from '@app/shared';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -22,8 +23,10 @@ async function bootstrap() {
 
   const logger = await app.resolve(AppLoggerService);
   app.useLogger(logger);
-  const PORT = (process.env.PORT || 3000) as number;
-  await app.listen(3000, () => {
+
+  const configService = app.get(ConfigService);
+  const PORT = configService.get<number>('PORT');
+  await app.listen(PORT, () => {
     logger.log(`Listening on port ${PORT}`);
   });
 }
