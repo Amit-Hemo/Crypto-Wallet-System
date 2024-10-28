@@ -15,12 +15,12 @@ async function bootstrap() {
       transport: Transport.TCP,
       options: {
         host: 'balance-service',
-        port: 3001,
+        port: (process.env.PORT || 3001) as number,
       },
       bufferLogs: true,
     },
   );
-  app.useLogger(new AppLoggerService());
+
   app.useGlobalPipes(
     new ValidationPipe({
       forbidUnknownValues: true,
@@ -28,10 +28,11 @@ async function bootstrap() {
         new RpcException(new BadRequestException(errors)),
     }),
   );
-  await app.listen();
 
-  const logger = new AppLoggerService();
-  logger.setContext(BalanceModule.name);
+  const logger = await app.resolve(AppLoggerService);
+  app.useLogger(logger);
+
+  await app.listen();
   logger.log('Balance service is listening for requests.');
 }
 bootstrap();

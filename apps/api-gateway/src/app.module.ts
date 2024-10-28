@@ -1,3 +1,4 @@
+import { AppLoggerModule } from '@app/shared';
 import { AllExceptionsFilter } from '@app/shared/error-handling/http-exception/http-exception.filter';
 import { GlobalRpcExceptionFilter } from '@app/shared/error-handling/rpc-exception/rpc-exception.filter';
 import { Module } from '@nestjs/common';
@@ -7,6 +8,7 @@ import { BalanceModule } from './balance/balance.module';
 
 @Module({
   imports: [
+    AppLoggerModule,
     BalanceModule,
     ThrottlerModule.forRoot([
       {

@@ -15,12 +15,11 @@ async function bootstrap() {
       transport: Transport.TCP,
       options: {
         host: 'rate-service',
-        port: 3002,
+        port: (process.env.PORT || 3002) as number,
       },
       bufferLogs: true,
     },
   );
-  app.useLogger(new AppLoggerService());
   app.useGlobalPipes(
     new ValidationPipe({
       forbidUnknownValues: true,
@@ -28,10 +27,10 @@ async function bootstrap() {
         new RpcException(new BadRequestException(errors)),
     }),
   );
-  await app.listen();
+  const logger = await app.resolve(AppLoggerService);
+  app.useLogger(logger);
 
-  const logger = new AppLoggerService();
-  logger.setContext(RateModule.name);
+  await app.listen();
   logger.log('Rate service is listening for requests.');
 }
 bootstrap();
