@@ -5,4 +5,6 @@ export const MessagePatterns = {
   GET_TOTAL_BALANCE_VALUE: 'get_total_balance_value',
   REBALANCE: 'rebalance',
   GET_RATE: 'get_rate',
+  GET_ALL_USERS: 'get_all_users',
+  GET_USER_BY_ID: 'get_user_by_id',
 } as const;

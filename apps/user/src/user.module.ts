@@ -4,32 +4,26 @@ import { GlobalRpcExceptionFilter } from '@app/shared/error-handling/rpc-excepti
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
-import { ThrottlerModule } from '@nestjs/throttler';
 import * as joi from 'joi';
 import * as path from 'path';
-import { BalanceModule } from './balance/balance.module';
-import { UserModule } from './user/user.module';
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: path.join('apps', 'api-gateway', '.env'),
+      envFilePath: path.join('apps', 'user', '.env'),
+      cache: true,
       isGlobal: true,
       validationSchema: joi.object({
-        PORT: joi.number().port().default(3000),
+        PORT: joi.number().port().default(3003),
       }),
     }),
     AppLoggerModule,
-    BalanceModule,
-    UserModule,
-    ThrottlerModule.forRoot([
-      {
-        ttl: 15 * 60 * 1000,
-        limit: 100,
-      },
-    ]),
   ],
+  controllers: [UserController],
   providers: [
+    UserService,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
@@ -40,4 +34,4 @@ import { UserModule } from './user/user.module';
     },
   ],
 })
-export class AppModule {}
+export class UserModule {}

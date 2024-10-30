@@ -30,6 +30,16 @@ services:
       - ./apps/rate/.env
     ports:
       - 3002:3002
+
+  user-service:
+    container_name: user-service
+    build:
+      context: .
+      dockerfile: ./apps/user/Dockerfile
+    environment:
+      NODE_ENV: development
+    ports:
+      - 3003:3003
       
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
