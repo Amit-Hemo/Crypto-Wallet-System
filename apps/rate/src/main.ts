@@ -10,28 +10,31 @@ import {
 import { RateModule } from './rate.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(RateModule, { bufferLogs: true });
+  const app = await NestFactory.createApplicationContext(RateModule);
   const configService = app.get(ConfigService);
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.TCP,
-    options: {
-      host: 'rate-service',
-      port: configService.get<number>('PORT'),
-    },
-  });
+  const microservice =
+    await NestFactory.createMicroservice<MicroserviceOptions>(RateModule, {
+      transport: Transport.TCP,
+      options: {
+        host: 'rate-service',
+        port: configService.get<number>('PORT'),
+      },
+      bufferLogs: true,
+    });
 
-  app.useGlobalPipes(
+  microservice.useGlobalPipes(
     new ValidationPipe({
       forbidUnknownValues: true,
       exceptionFactory: (errors) =>
         new RpcException(new BadRequestException(errors)),
     }),
   );
-  const logger = await app.resolve(AppLoggerService);
-  app.useLogger(logger);
 
-  await app.startAllMicroservices();
+  const logger = await microservice.resolve(AppLoggerService);
+  microservice.useLogger(logger);
+
+  await microservice.listen();
   logger.log('Rate service is listening for requests.');
 }
 bootstrap();

@@ -10,18 +10,20 @@ import {
 import { BalanceModule } from './balance.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(BalanceModule, { bufferLogs: true });
+  const app = await NestFactory.createApplicationContext(BalanceModule);
   const configService = app.get(ConfigService);
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.TCP,
-    options: {
-      host: 'balance-service',
-      port: configService.get<number>('PORT'),
-    },
-  });
+  const microservice =
+    await NestFactory.createMicroservice<MicroserviceOptions>(BalanceModule, {
+      transport: Transport.TCP,
+      options: {
+        host: 'balance-service',
+        port: configService.get<number>('PORT'),
+      },
+      bufferLogs: true,
+    });
 
-  app.useGlobalPipes(
+  microservice.useGlobalPipes(
     new ValidationPipe({
       forbidUnknownValues: true,
       exceptionFactory: (errors) =>
@@ -29,10 +31,10 @@ async function bootstrap() {
     }),
   );
 
-  const logger = await app.resolve(AppLoggerService);
-  app.useLogger(logger);
+  const logger = await microservice.resolve(AppLoggerService);
+  microservice.useLogger(logger);
 
-  await app.startAllMicroservices();
+  await microservice.listen();
   logger.log('Balance service is listening for requests.');
 }
 bootstrap();
