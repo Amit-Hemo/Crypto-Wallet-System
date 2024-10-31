@@ -2,10 +2,12 @@ import { AppLoggerModule } from '@app/shared';
 import { AllExceptionsFilter } from '@app/shared/error-handling/http-exception/http-exception.filter';
 import { GlobalRpcExceptionFilter } from '@app/shared/error-handling/rpc-exception/rpc-exception.filter';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import * as joi from 'joi';
 import * as path from 'path';
+import { User } from './entities/User';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
@@ -17,8 +19,28 @@ import { UserService } from './user.service';
       isGlobal: true,
       validationSchema: joi.object({
         PORT: joi.number().port().default(3003),
+        DB_HOST: joi.string().min(1).required(),
+        DB_PORT: joi.number().port().required(),
+        DB_USER: joi.string().min(1).required(),
+        DB_NAME: joi.string().min(1).required(),
+        DB_PASSWORD: joi.string().min(1).required(),
       }),
     }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DB_HOST'),
+        port: Number(configService.get<number>('DB_PORT')),
+        username: configService.get<string>('DB_USER'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_NAME'),
+        entities: [User],
+        synchronize: true, // Disable in production
+      }),
+      inject: [ConfigService],
+    }),
+    TypeOrmModule.forFeature([User]),
     AppLoggerModule,
   ],
   controllers: [UserController],

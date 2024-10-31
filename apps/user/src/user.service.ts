@@ -1,34 +1,70 @@
+import { AppLoggerService } from '@app/shared';
+import { CreateUserDto } from '@app/shared/dto/create-user.dto';
 import { User } from '@app/shared/interfaces/user.interface';
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User as UserEntity } from './entities/User';
+import { hashPassword } from './utils/helpers';
 
 @Injectable()
 export class UserService {
-  private users: User[];
-
-  constructor() {
-    this.users = [
-      {
-        id: 1,
-        email: 'amit@gmail.com',
-        username: 'amithemo12',
-      },
-      {
-        id: 2,
-        email: 'noam@gmail.com',
-        username: 'noamhemop',
-      },
-    ];
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+    private readonly logger: AppLoggerService,
+  ) {
+    this.logger.setContext(UserService.name);
   }
 
-  getAllUsers(): User[] {
-    return this.users;
+  async createUser(createUserCredentials: CreateUserDto): Promise<void> {
+    try {
+      const existingUser = await this.getUserByUsername(
+        createUserCredentials.username,
+      );
+      if (existingUser) {
+        this.logger.error(
+          `User with id ${createUserCredentials.username} already exists`,
+        );
+        throw new ConflictException('User already exists');
+      }
+
+      const hashedPassword = await hashPassword(createUserCredentials.password);
+      const params = { ...createUserCredentials, password: hashedPassword };
+      await this.userRepository
+        .createQueryBuilder('user')
+        .insert()
+        .values(params)
+        .execute();
+
+      this.logger.log('Successfully created new user');
+    } catch (error) {
+      this.logger.error(`Failed to create a new user: ${error?.message ?? ''}`);
+      throw error;
+    }
   }
 
-  getUserById(id: number): User {
-    return this.users.find((user) => user.id === id);
+  async getAllUsers(): Promise<User[]> {
+    try {
+      return await this.userRepository
+        .createQueryBuilder('user')
+        .select(['user.id', 'user.username', 'user.email'])
+        .getMany();
+    } catch (error) {
+      const message = `Failed to retrieve users: ${error?.message ?? ''}`;
+      this.logger.error(message);
+      throw new RpcException('Failed to retrieve users');
+    }
   }
 
-  getUserByEmail(email: string) {
-    return this.users.find((user) => user.email === email);
+  private async getUserByUsername(
+    username: string,
+  ): Promise<Pick<UserEntity, 'username'> | null> {
+    return await this.userRepository
+      .createQueryBuilder('user')
+      .select('user.id')
+      .where('user.username = :username', { username })
+      .getOne();
   }
 }

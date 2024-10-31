@@ -6,5 +6,5 @@ export const MessagePatterns = {
   REBALANCE: 'rebalance',
   GET_RATE: 'get_rate',
   GET_ALL_USERS: 'get_all_users',
-  GET_USER_BY_ID: 'get_user_by_id',
+  CREATE_USER: 'create_user',
 } as const;

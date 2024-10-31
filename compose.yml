@@ -6,6 +6,8 @@ services:
       dockerfile: ./apps/api-gateway/Dockerfile
     environment:
       NODE_ENV: development
+    env_file:
+      - ./apps/api-gateway/.env
     ports:
       - 3000:3000
 
@@ -16,6 +18,8 @@ services:
       dockerfile: ./apps/balance/Dockerfile
     environment:
       NODE_ENV: development
+    env_file:
+      - ./apps/balance/.env
     ports:
       - 3001:3001
 
@@ -38,39 +42,35 @@ services:
       dockerfile: ./apps/user/Dockerfile
     environment:
       NODE_ENV: development
+    env_file:
+      - ./apps/user/.env
     ports:
       - 3003:3003
-      
-# The commented out section below is an example of how to define a PostgreSQL
-# database that your application can use. `depends_on` tells Docker Compose to
-# start the database before your application. The `db-data` volume persists the
-# database data between container restarts. The `db-password` secret is used
-# to set the database password. You must create `db/password.txt` and add
-# a password of your choosing to it before running `docker-compose up`.
-#     depends_on:
-#       db:
-#         condition: service_healthy
-#   db:
-#     image: postgres
-#     restart: always
-#     user: postgres
-#     secrets:
-#       - db-password
-#     volumes:
-#       - db-data:/var/lib/postgresql/data
-#     environment:
-#       - POSTGRES_DB=example
-#       - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
-#     expose:
-#       - 5432
-#     healthcheck:
-#       test: [ "CMD", "pg_isready" ]
-#       interval: 10s
-#       timeout: 5s
-#       retries: 5
-# volumes:
-#   db-data:
-# secrets:
-#   db-password:
-#     file: db/password.txt
+    depends_on:
+      postgres-user:
+        condition: service_healthy
+        
+  postgres-user:
+    image: postgres
+    restart: always
+    user: postgres
+    secrets:
+      - postgres-user-password
+    volumes:
+      - postgres-user-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=users_db
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres-user-password
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ['CMD', 'pg_isready']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+volumes:
+  postgres-user-data:
+secrets:
+  postgres-user-password:
+    file: ./apps/user/db/password.txt
