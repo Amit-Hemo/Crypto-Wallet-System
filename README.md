@@ -3,8 +3,7 @@
 The system will allow users to manage their crypto holdings and view current valuations built with NestJS.
 
 ## Architecture
-### ** *Please click on the picture and open the document tab for the approach explanation* **
-<a href="https://app.eraser.io/workspace/nCeo9GJ8W4I2jVVdPZst?elements=PsIDxAlSMNf4pEHxKFnT9Q">View on Eraser<br /><img src="https://app.eraser.io/workspace/nCeo9GJ8W4I2jVVdPZst/preview?elements=PsIDxAlSMNf4pEHxKFnT9Q&type=embed" width=750 height=450/></a>
+![image](https://github.com/user-attachments/assets/87732884-22fd-42ba-806b-e4f6d3815732)
 
 ## Project setup
 
