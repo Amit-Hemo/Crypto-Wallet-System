@@ -22,6 +22,9 @@ services:
       - ./apps/balance/.env
     ports:
       - 3001:3001
+    depends_on:
+      postgres-balance:
+        condition: service_healthy
 
   rate-service:
     container_name: rate-service
@@ -49,7 +52,26 @@ services:
     depends_on:
       postgres-user:
         condition: service_healthy
-        
+
+  postgres-balance:
+    image: postgres
+    restart: always
+    user: postgres
+    secrets:
+      - postgres-balance-password
+    volumes:
+      - postgres-balance-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=balances_db
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres-balance-password
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ['CMD', 'pg_isready']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   postgres-user:
     image: postgres
     restart: always
@@ -62,7 +84,7 @@ services:
       - POSTGRES_DB=users_db
       - POSTGRES_PASSWORD_FILE=/run/secrets/postgres-user-password
     ports:
-      - 5432:5432
+      - 5433:5432
     healthcheck:
       test: ['CMD', 'pg_isready']
       interval: 10s
@@ -70,7 +92,10 @@ services:
       retries: 5
 
 volumes:
+  postgres-balance-data:
   postgres-user-data:
 secrets:
+  postgres-balance-password:
+    file: ./apps/balance/db/password.txt
   postgres-user-password:
     file: ./apps/user/db/password.txt

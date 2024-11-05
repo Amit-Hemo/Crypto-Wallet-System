@@ -13,7 +13,7 @@ export class AuthGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const userId = this.extractUserFromHeader(request);
-    if (!userId) {
+    if (!userId || isNaN(Number(userId))) {
       throw new UnauthorizedException('X-User-ID header is missing');
     }
     return true;

@@ -1,6 +1,6 @@
-import { CryptoAsset } from './asset.interface';
+import { BalanceAsset } from './asset.interface';
 
 export interface UserBalance {
-  userId: string;
-  assets: CryptoAsset[];
+  userId: number;
+  assets: BalanceAsset[];
 }

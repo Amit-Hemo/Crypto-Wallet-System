@@ -7,23 +7,25 @@ import { APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as joi from 'joi';
 import * as path from 'path';
-import { User } from './entities/User';
-import { UserController } from './user.controller';
-import { UserService } from './user.service';
+import { AssetModule } from './asset/asset.module';
+import { BalanceModule } from './balance/balance.module';
+import { Asset } from './entities/Asset';
+import { Balance } from './entities/Balance';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: path.join('apps', 'user', '.env'),
+      envFilePath: path.join('apps', 'balance', '.env'),
       cache: true,
       isGlobal: true,
       validationSchema: joi.object({
-        PORT: joi.number().port().default(3003),
+        PORT: joi.number().port().default(3001),
         DB_HOST: joi.string().trim().min(1).required(),
         DB_PORT: joi.number().port().required(),
         DB_USER: joi.string().trim().min(1).required(),
         DB_NAME: joi.string().trim().min(1).required(),
         DB_PASSWORD: joi.string().trim().min(1).required(),
+        COINGECKO_API_KEY: joi.string().trim().min(20).required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -35,17 +37,16 @@ import { UserService } from './user.service';
         username: configService.get<string>('DB_USER'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [User],
-        synchronize: true, // Disable in production
+        entities: [Asset, Balance],
+        synchronize: true, // Disable in production,
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([User]),
     AppLoggerModule,
+    AssetModule,
+    BalanceModule,
   ],
-  controllers: [UserController],
   providers: [
-    UserService,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
@@ -56,4 +57,4 @@ import { UserService } from './user.service';
     },
   ],
 })
-export class UserModule {}
+export class AppModule {}

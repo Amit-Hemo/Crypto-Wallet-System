@@ -7,14 +7,14 @@ import {
   RpcException,
   Transport,
 } from '@nestjs/microservices';
-import { BalanceModule } from './balance.module';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.createApplicationContext(BalanceModule);
+  const app = await NestFactory.createApplicationContext(AppModule);
   const configService = app.get(ConfigService);
 
   const microservice =
-    await NestFactory.createMicroservice<MicroserviceOptions>(BalanceModule, {
+    await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
       transport: Transport.TCP,
       options: {
         host: 'balance-service',

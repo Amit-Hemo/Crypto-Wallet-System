@@ -1,7 +1,7 @@
 import { AppLoggerService, FileManagementService } from '@app/shared';
 import { GetRatePayloadDto } from '@app/shared/dto/get-rate.dto';
 import { Services } from '@app/shared/general/services.contants';
-import { CryptoAsset } from '@app/shared/interfaces/asset.interface';
+import { BalanceAsset } from '@app/shared/interfaces/asset.interface';
 import { UserBalance } from '@app/shared/interfaces/balance.interface';
 import { RatesResponse } from '@app/shared/interfaces/rate.interface';
 import { ClientProxy } from '@nestjs/microservices';
@@ -54,7 +54,7 @@ describe('BalanceService', () => {
   describe('addAssetToBalance, happy flows', () => {
     it('should create a new user balance with a new asset with amount', async () => {
       const userId = 'test_user_1';
-      const asset: CryptoAsset = { id: 'bitcoin', amount: 1.5 };
+      const asset: BalanceAsset = { id: 'bitcoin', amount: 1.5 };
 
       //mocking the file
       const existingBalances = [];
@@ -72,7 +72,7 @@ describe('BalanceService', () => {
 
     it('should raise an asset by amount in user balance', async () => {
       const userId = 'test_user_2';
-      const asset: CryptoAsset = { id: 'bitcoin', amount: 1.5 };
+      const asset: BalanceAsset = { id: 'bitcoin', amount: 1.5 };
 
       //mocking the file
       const existingBalances = [{ userId, assets: [] }];

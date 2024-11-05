@@ -25,8 +25,8 @@ export class UserController {
   ) {}
 
   @Get()
-  async getAllUsers(@Headers('X-User-ID') userId: string) {
-    const payload: UserIdDto = { userId };
+  async getAllUsers(@Headers('X-User-ID') userId: number) {
+    const payload: UserIdDto = { userId: Number(userId) };
     return this.clientUserService.send(
       { cmd: MessagePatterns.GET_ALL_USERS },
       payload,
@@ -35,7 +35,7 @@ export class UserController {
 
   @Post()
   async createUser(
-    @Headers('X-User-ID') userId: string,
+    @Headers('X-User-ID') userId: number,
     @Body() credentials: CreateUserDto,
   ) {
     return this.clientUserService.send(

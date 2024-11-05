@@ -36,34 +36,16 @@ export class BalanceController {
   constructor() {}
 
   /**
-   * Retrieve balance assets with their values against given currency for a user
-   * @param userId - The ID of the user (sent in the header)
-   * @param currency - The currency for which to retrieve the balance values
-   * @returns User balance
-   */
-  @Get('assets')
-  async getBalancesValues(
-    @Headers('X-User-ID') userId: string,
-    @Query('currency') currency: string,
-  ) {
-    const payload: BalanceValueDto = { userId, currency };
-    return this.clientBalanceService.send(
-      { cmd: MessagePatterns.GET_BALANCE },
-      payload,
-    );
-  }
-
-  /**
    * Add a new asset to the user's balance or add to an existing one by amount
    * @param userId - The ID of the user
    * @param assetDto - The asset data
    */
   @Put('assets')
   async addAssetToBalance(
-    @Headers('X-User-ID') userId: string,
+    @Headers('X-User-ID') userId: number,
     @Body() assetDto: AddAssetDto,
   ) {
-    const payload: AddAssetPayloadDto = { ...assetDto, userId };
+    const payload: AddAssetPayloadDto = { ...assetDto, userId: Number(userId) };
     return this.clientBalanceService.send(
       { cmd: MessagePatterns.ADD_ASSET },
       payload,
@@ -78,13 +60,35 @@ export class BalanceController {
    */
   @Patch('assets/:id')
   async removeAssetFromBalance(
-    @Headers('X-User-ID') userId: string,
+    @Headers('X-User-ID') userId: number,
     @Param('id') assetId: string,
     @Body() body: RemoveAssetDto,
   ) {
-    const payload: RemoveAssetPayloadDto = { ...body, id: assetId, userId };
+    const payload: RemoveAssetPayloadDto = {
+      ...body,
+      id: assetId,
+      userId: Number(userId),
+    };
     return this.clientBalanceService.send(
       { cmd: MessagePatterns.REMOVE_ASSET },
+      payload,
+    );
+  }
+
+  /**
+   * Retrieve balance assets with their values against given currency for a user
+   * @param userId - The ID of the user (sent in the header)
+   * @param currency - The currency for which to retrieve the balance values
+   * @returns User balance
+   */
+  @Get('assets')
+  async getBalancesValues(
+    @Headers('X-User-ID') userId: number,
+    @Query('currency') currency: string,
+  ) {
+    const payload: BalanceValueDto = { userId: Number(userId), currency };
+    return this.clientBalanceService.send(
+      { cmd: MessagePatterns.GET_BALANCE },
       payload,
     );
   }
@@ -97,10 +101,10 @@ export class BalanceController {
    */
   @Get('total')
   async getTotalBalance(
-    @Headers('X-User-ID') userId: string,
+    @Headers('X-User-ID') userId: number,
     @Query('currency') currency: string,
   ) {
-    const payload: BalanceValueDto = { userId, currency };
+    const payload: BalanceValueDto = { userId: Number(userId), currency };
     return this.clientBalanceService.send(
       { cmd: MessagePatterns.GET_TOTAL_BALANCE_VALUE },
       payload,
@@ -115,13 +119,13 @@ export class BalanceController {
    */
   @Put('rebalance')
   async rebalance(
-    @Headers('X-User-ID') userId: string,
+    @Headers('X-User-ID') userId: number,
     @Query('currency') currency: string,
     @Body() targetPercentages: TargetPercentagesDto,
   ) {
     const payload: RebalancePayloadDto = {
-      userId,
-      currency: currency || 'usd',
+      userId: Number(userId),
+      currency: currency || 'usd', //usd is a common default currency around the world
       targetPercentages: targetPercentages.targetPercentages,
     };
 

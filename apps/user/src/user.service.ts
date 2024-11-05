@@ -47,10 +47,12 @@ export class UserService {
 
   async getAllUsers(): Promise<User[]> {
     try {
-      return await this.userRepository
+      const allUsers = await this.userRepository
         .createQueryBuilder('user')
         .select(['user.id', 'user.username', 'user.email'])
         .getMany();
+      this.logger.log('Successfully retrieved all users');
+      return allUsers;
     } catch (error) {
       const message = `Failed to retrieve users: ${error?.message ?? ''}`;
       this.logger.error(message);
