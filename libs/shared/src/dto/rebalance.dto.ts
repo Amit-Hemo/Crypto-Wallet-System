@@ -45,7 +45,7 @@ export class IsValidPercentagesConstraint
   ) {
     return Object.values(targetPercentages).every(
       (percentage) =>
-        typeof percentage === 'number' && percentage >= 0 && percentage <= 100,
+        typeof percentage === 'number' && percentage > 0 && percentage < 100,
     );
   }
 
