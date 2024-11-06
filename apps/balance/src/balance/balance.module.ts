@@ -1,4 +1,4 @@
-import { AppLoggerModule, FileManagementModule } from '@app/shared';
+import { AppLoggerModule } from '@app/shared';
 import { Services } from '@app/shared/general/services.contants';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -21,7 +21,6 @@ import { BalanceService } from './balance.service';
         },
       },
     ]),
-    FileManagementModule,
     AppLoggerModule,
     TypeOrmModule.forFeature([Balance, Asset]),
     AssetModule,

@@ -257,7 +257,7 @@ export class BalanceService {
     }
   }
 
-  private async getBalanceAsset(
+  async getBalanceAsset(
     userId: number,
     assetId: number,
   ): Promise<Omit<Balance, 'asset'> | null> {
