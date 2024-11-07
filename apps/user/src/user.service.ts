@@ -59,10 +59,8 @@ export class UserService {
     }
   }
 
-  private async getUserByEmail(
-    email: string,
-  ): Promise<Pick<UserEntity, 'email'> | null> {
-    return await this.userRepository
+  async getUserByEmail(email: string): Promise<Pick<UserEntity, 'id'> | null> {
+    return this.userRepository
       .createQueryBuilder('user')
       .select('user.id')
       .where('user.email = :email', { email })
