@@ -20,13 +20,12 @@ export class UserService {
 
   async createUser(createUserCredentials: CreateUserDto): Promise<void> {
     try {
-      const existingUser = await this.getUserByUsername(
-        createUserCredentials.username,
+      const existingUser = await this.getUserByEmail(
+        createUserCredentials.email,
       );
+
       if (existingUser) {
-        this.logger.error(
-          `User with id ${createUserCredentials.username} already exists`,
-        );
+        this.logger.error(`User ${createUserCredentials.email} already exists`);
         throw new ConflictException('User already exists');
       }
 
@@ -60,13 +59,13 @@ export class UserService {
     }
   }
 
-  private async getUserByUsername(
-    username: string,
-  ): Promise<Pick<UserEntity, 'username'> | null> {
+  private async getUserByEmail(
+    email: string,
+  ): Promise<Pick<UserEntity, 'email'> | null> {
     return await this.userRepository
       .createQueryBuilder('user')
       .select('user.id')
-      .where('user.username = :username', { username })
+      .where('user.email = :email', { email })
       .getOne();
   }
 }
