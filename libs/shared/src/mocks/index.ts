@@ -3,6 +3,7 @@ export const mockRepository = {
   createQueryBuilder: jest.fn().mockReturnValue({
     insert: jest.fn().mockReturnThis(),
     values: jest.fn().mockReturnThis(),
+    orUpdate: jest.fn().mockReturnThis(),
     delete: jest.fn().mockReturnThis(),
     update: jest.fn().mockReturnThis(),
     set: jest.fn().mockReturnThis(),

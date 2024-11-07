@@ -37,7 +37,7 @@ export class AssetService {
   }
 
   @Cron('50 23 * * *') //23:50 since there is a midnight cron also that might depend on this
-  private async updateAssets() {
+  async updateAssets() {
     try {
       this.logger.log('[CRON] Updating assets entries...');
       const availableAssets = await this.fetchAvailableAssets();
