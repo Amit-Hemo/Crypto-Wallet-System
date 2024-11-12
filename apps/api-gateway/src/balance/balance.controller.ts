@@ -55,18 +55,18 @@ export class BalanceController {
   /**
    * Decrease by amount (auto remove when empty) an asset from the user's balance
    * @param userId - The ID of the user
-   * @param assetId - The ID of the asset to remove
+   * @param searchId - The id of the asset to remove (search id = id of the asset that is used to search in the external API)
    * @param body - The amount to remove
    */
-  @Patch('assets/:id')
+  @Patch('assets/:searchId')
   async removeAssetFromBalance(
     @Headers('X-User-ID') userId: number,
-    @Param('id') assetId: string,
+    @Param('searchId') searchId: string,
     @Body() body: RemoveAssetDto,
   ) {
     const payload: RemoveAssetPayloadDto = {
       ...body,
-      id: assetId,
+      searchId,
       userId: Number(userId),
     };
     return this.clientBalanceService.send(

@@ -20,7 +20,7 @@ export class BalanceController {
 
   @MessagePattern({ cmd: MessagePatterns.ADD_ASSET })
   async addAssetToBalance(@Payload() payload: AddAssetPayloadDto) {
-    const { userId, id: assetSearchId, amount } = payload;
+    const { userId, searchId: assetSearchId, amount } = payload;
     this.logger.log(`Received request to add/update asset for user ${userId}`);
     try {
       await this.balanceService.addAssetToBalance(
@@ -43,7 +43,7 @@ export class BalanceController {
 
   @MessagePattern({ cmd: MessagePatterns.REMOVE_ASSET })
   async removeAssetFromBalance(@Payload() payload: RemoveAssetPayloadDto) {
-    const { userId, id: assetSearchId, amount } = payload;
+    const { userId, searchId: assetSearchId, amount } = payload;
     this.logger.log(`Received request to remove asset for user ${userId}`);
     try {
       await this.balanceService.removeAssetFromBalance(

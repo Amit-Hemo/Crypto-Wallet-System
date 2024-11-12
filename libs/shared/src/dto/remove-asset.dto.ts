@@ -10,7 +10,7 @@ export class RemoveAssetDto {
 }
 
 export class RemoveAssetPayloadDto extends IntersectionType(
-  PickType(BaseAssetDto, ['id'] as const),
+  PickType(BaseAssetDto, ['searchId'] as const),
   RemoveAssetDto,
   UserIdDto,
 ) {}
