@@ -7,9 +7,9 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User as UserEntity } from './src/entities/User';
-import { UserService } from './src/user.service';
-import * as helpers from './src/utils/helpers';
+import { User as UserEntity } from './entities/User';
+import { UserService } from './user.service';
+import * as helpers from './utils/helpers';
 
 describe('BalanceService', () => {
   let userRepository: Repository<UserEntity>;
@@ -120,20 +120,98 @@ describe('BalanceService', () => {
   });
 
   describe('getUserByEmail', () => {
-    it('should return user with email', async () => {
+    it('should return user with email while excluding password', async () => {
       const email = 'blala@sd.com';
-      const id = 3;
+      const returnedUser = {
+        id: 3,
+        email,
+        username: 'blalalala',
+      };
 
       const queryBuilder = userRepository.createQueryBuilder();
       jest
         .spyOn(queryBuilder, 'getOne')
-        .mockResolvedValueOnce({ id } as UserEntity);
+        .mockResolvedValueOnce(returnedUser as UserEntity);
 
       const res = await userService.getUserByEmail(email);
       expect(userRepository.createQueryBuilder).toHaveBeenCalledWith('user');
-      expect(queryBuilder.select).toHaveBeenCalledWith('user.id');
+      expect(queryBuilder.select).toHaveBeenCalled();
+      expect(queryBuilder.addSelect).not.toHaveBeenCalled();
       expect(queryBuilder.getOne).toHaveBeenCalled();
-      expect(res).toStrictEqual({ id });
+      expect(res).toStrictEqual(returnedUser);
+      expect(res.email).toEqual(returnedUser.email);
+    });
+
+    it('should return user with email including password', async () => {
+      const email = 'blala@sd.com';
+      const returnedUser = {
+        id: 3,
+        email,
+        username: 'blalalala',
+        password: 'fdsfljsfsda34fd',
+      };
+
+      const queryBuilder = userRepository.createQueryBuilder();
+      jest
+        .spyOn(queryBuilder, 'getOne')
+        .mockResolvedValueOnce(returnedUser as UserEntity);
+
+      const res = await userService.getUserByEmail(email, {
+        exposePassword: true,
+      });
+      expect(userRepository.createQueryBuilder).toHaveBeenCalledWith('user');
+      expect(queryBuilder.addSelect).toHaveBeenCalledWith('user.password');
+      expect(queryBuilder.getOne).toHaveBeenCalled();
+      expect(res).toStrictEqual(returnedUser);
+      expect(res.email).toEqual(returnedUser.email);
+    });
+
+    it('should return null if user not found', async () => {
+      const email = 'blala@sd.com';
+
+      const queryBuilder = userRepository.createQueryBuilder();
+      jest.spyOn(queryBuilder, 'getOne').mockResolvedValueOnce(null);
+
+      const res = await userService.getUserByEmail(email);
+      expect(userRepository.createQueryBuilder).toHaveBeenCalledWith('user');
+      expect(queryBuilder.select).toHaveBeenCalled();
+      expect(queryBuilder.getOne).toHaveBeenCalled();
+      expect(res).toStrictEqual(null);
+    });
+  });
+
+  describe('getUserById', () => {
+    it('should return user with the same id', async () => {
+      const id = 2;
+      const returnedUser = {
+        id,
+        email: 'faskdfnslf@csd.com',
+        username: 'asfd',
+      };
+
+      const queryBuilder = userRepository.createQueryBuilder();
+      jest
+        .spyOn(queryBuilder, 'getOne')
+        .mockResolvedValueOnce(returnedUser as UserEntity);
+
+      const res = await userService.getUserById(id);
+      expect(userRepository.createQueryBuilder).toHaveBeenCalledWith('user');
+      expect(queryBuilder.select).toHaveBeenCalled();
+      expect(queryBuilder.getOne).toHaveBeenCalled();
+      expect(res).toStrictEqual(returnedUser);
+      expect(res.id).toEqual(returnedUser.id);
+    });
+
+    it('should return null if user not found', async () => {
+      const id = 2;
+      const queryBuilder = userRepository.createQueryBuilder();
+      jest.spyOn(queryBuilder, 'getOne').mockResolvedValueOnce(null);
+
+      const res = await userService.getUserById(id);
+      expect(userRepository.createQueryBuilder).toHaveBeenCalledWith('user');
+      expect(queryBuilder.select).toHaveBeenCalled();
+      expect(queryBuilder.getOne).toHaveBeenCalled();
+      expect(res).toStrictEqual(null);
     });
   });
 });
