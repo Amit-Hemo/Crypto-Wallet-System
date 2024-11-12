@@ -5,6 +5,8 @@ import {
   Controller,
   Get,
   Headers,
+  Param,
+  ParseIntPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -21,6 +23,14 @@ export class UserController {
   @Get()
   async getAllUsers(@Headers('X-User-ID') userId: number) {
     return this.userService.getAllUsers(Number(userId));
+  }
+
+  @Get(':selectUserId')
+  async getUserById(
+    @Headers('X-User-ID') userId: number,
+    @Param('selectUserId', ParseIntPipe) selectUserId: number,
+  ) {
+    return this.userService.getUserById(Number(userId), selectUserId);
   }
 
   @Post()

@@ -1,9 +1,13 @@
 import { AppLoggerService } from '@app/shared';
 import { CreateUserDto } from '@app/shared/dto/create-user.dto';
-import { User } from '@app/shared/interfaces/user.interface';
+import {
+  User,
+  UserSelectionOptions,
+} from '@app/shared/interfaces/user.interface';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
+import { instanceToPlain } from 'class-transformer';
 import { Repository } from 'typeorm';
 import { User as UserEntity } from './entities/User';
 import { hashPassword } from './utils/helpers';
@@ -25,7 +29,7 @@ export class UserService {
       );
 
       if (existingUser) {
-        this.logger.error(`User ${createUserCredentials.email} already exists`);
+        this.logger.error(`User email already exists`);
         throw new ConflictException('User already exists');
       }
 
@@ -51,7 +55,7 @@ export class UserService {
         .select(['user.id', 'user.username', 'user.email'])
         .getMany();
       this.logger.log('Successfully retrieved all users');
-      return allUsers;
+      return instanceToPlain(allUsers) as User[];
     } catch (error) {
       const message = `Failed to retrieve users: ${error?.message ?? ''}`;
       this.logger.error(message);
@@ -59,11 +63,41 @@ export class UserService {
     }
   }
 
-  async getUserByEmail(email: string): Promise<Pick<UserEntity, 'id'> | null> {
-    return this.userRepository
-      .createQueryBuilder('user')
-      .select('user.id')
-      .where('user.email = :email', { email })
-      .getOne();
+  async getUserById(id: number): Promise<User | null> {
+    try {
+      const user = await this.userRepository
+        .createQueryBuilder('user')
+        .select()
+        .where('user.id = :id', { id })
+        .getOne();
+
+      this.logger.log('Successfully retrieved user');
+      return instanceToPlain(user) as User;
+    } catch (error) {
+      const message = `Failed to retrieve user: ${error?.message ?? ''}`;
+      this.logger.error(message);
+      throw new RpcException('Failed to retrieve user');
+    }
+  }
+
+  async getUserByEmail(
+    email: string,
+    options?: UserSelectionOptions,
+  ): Promise<User | null> {
+    try {
+      const query = this.userRepository
+        .createQueryBuilder('user')
+        .select()
+        .where('user.email = :email', { email });
+      if (options?.exposePassword) query.addSelect('user.password');
+
+      const user = await query.getOne();
+      this.logger.log('Successfully retrieved user');
+      return instanceToPlain(user) as User;
+    } catch (error) {
+      const message = `Failed to retrieve user: ${error?.message ?? ''}`;
+      this.logger.error(message);
+      throw new RpcException('Failed to retrieve user');
+    }
   }
 }
