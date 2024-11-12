@@ -20,11 +20,18 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  /**
+   * Gets all users
+   */
   @Get()
   async getAllUsers(@Headers('X-User-ID') userId: number) {
     return this.userService.getAllUsers(Number(userId));
   }
 
+  /**
+   * Get a user by id
+   * @param selectUserId The id of the user we want to get
+   */
   @Get(':selectUserId')
   async getUserById(
     @Headers('X-User-ID') userId: number,
@@ -33,6 +40,10 @@ export class UserController {
     return this.userService.getUserById(Number(userId), selectUserId);
   }
 
+  /**
+   * Creates a new user
+   * @param credentials User details for the created user
+   */
   @Post()
   async createUser(
     @Headers('X-User-ID') userId: number,
