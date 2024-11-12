@@ -354,6 +354,7 @@ describe('BalanceService', () => {
           },
         ],
       });
+      expect(result.userId).toEqual(userId);
     });
 
     it('should get empty user balance if user does not have any balance', async () => {

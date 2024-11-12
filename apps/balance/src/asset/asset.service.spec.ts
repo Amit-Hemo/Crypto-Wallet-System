@@ -71,6 +71,7 @@ describe('AssetService', () => {
       const res = await assetService.getAssetBySearchId(searchId);
       expect(assetRepository.createQueryBuilder).toHaveBeenCalledWith('asset');
       expect(res).toEqual<Asset>(assetDB);
+      expect(res.search_id).toEqual(searchId);
     });
 
     it('should return null if asset not found', async () => {
