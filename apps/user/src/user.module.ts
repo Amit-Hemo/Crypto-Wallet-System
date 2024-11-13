@@ -1,5 +1,4 @@
 import { AppLoggerModule } from '@app/shared';
-import { AllExceptionsFilter } from '@app/shared/error-handling/http-exception/http-exception.filter';
 import { GlobalRpcExceptionFilter } from '@app/shared/error-handling/rpc-exception/rpc-exception.filter';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -46,10 +45,6 @@ import { UserService } from './user.service';
   controllers: [UserController],
   providers: [
     UserService,
-    {
-      provide: APP_FILTER,
-      useClass: AllExceptionsFilter,
-    },
     {
       provide: APP_FILTER,
       useClass: GlobalRpcExceptionFilter,

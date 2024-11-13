@@ -1,5 +1,4 @@
 import { AppLoggerModule } from '@app/shared';
-import { AllExceptionsFilter } from '@app/shared/error-handling/http-exception/http-exception.filter';
 import { GlobalRpcExceptionFilter } from '@app/shared/error-handling/rpc-exception/rpc-exception.filter';
 import { HttpModule } from '@nestjs/axios';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -38,10 +37,6 @@ import { RateService } from './rate.service';
   controllers: [RateController],
   providers: [
     RateService,
-    {
-      provide: APP_FILTER,
-      useClass: AllExceptionsFilter,
-    },
     {
       provide: APP_FILTER,
       useClass: GlobalRpcExceptionFilter,
