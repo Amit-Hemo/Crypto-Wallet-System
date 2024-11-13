@@ -11,11 +11,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '../auth.guard';
+import { HeaderAuthGuard } from '../auth/guards/header-auth.guard';
 import { UserService } from './user.service';
 
 @ApiTags('user')
-@UseGuards(AuthGuard)
+@UseGuards(HeaderAuthGuard)
 @Controller(Routes.USERS)
 export class UserController {
   constructor(private readonly userService: UserService) {}

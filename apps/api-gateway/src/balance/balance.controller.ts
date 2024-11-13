@@ -25,10 +25,10 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '../auth.guard';
+import { HeaderAuthGuard } from '../auth/guards/header-auth.guard';
 
 @ApiTags('balance')
-@UseGuards(AuthGuard)
+@UseGuards(HeaderAuthGuard)
 @Controller(Routes.BALANCES)
 export class BalanceController {
   @Inject(Services.BALANCE)
