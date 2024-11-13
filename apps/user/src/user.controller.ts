@@ -59,7 +59,7 @@ export class UserController {
       });
       const message = `Successfully found and retreieved the user`;
       this.logger.log(message);
-      return new SuccessResponse(message, user);
+      return user;
     } catch (error) {
       this.logger.error(`Error processing request: ${error?.message ?? ''}`);
       if (error instanceof RpcException) throw error;
