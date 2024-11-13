@@ -21,7 +21,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException) {
       httpStatus = exception.getStatus();
-      message = exception.message;
+      const details = exception.getResponse();
+      if (typeof details === 'object') {
+        message = 'message' in details ? (details.message as string) : message;
+      } else {
+        message = details;
+      }
     } else if (exception instanceof Error) {
       message = exception.message;
     } else if (
@@ -38,7 +43,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message,
       httpAdapter.getRequestUrl(ctx.getRequest()),
     );
-
     httpAdapter.reply(ctx.getResponse(), errorResponse, httpStatus);
   }
 }
