@@ -35,6 +35,10 @@ export class AuthController {
     logger.setContext(AuthController.name);
   }
 
+  /**
+   * Registers a new user
+   * @param credentails Create user credentials
+   */
   @Post('register')
   async registerUser(@Body() credentails: CreateUserDto) {
     this.logger.log('Received request to register user');
@@ -48,13 +52,23 @@ export class AuthController {
     }
   }
 
+  /**
+   * Logs in a user
+   * @param user Authenticated user after providing valid credentials
+   * @returns Access Token
+   */
   @UseGuards(LocalAuthGuard)
-  @ApiBody({ type: LoginCredentialsDto })
+  @ApiBody({ type: LoginCredentialsDto, description: 'Login credentials' })
   @Post('login')
   async login(@AuthUser() user: User) {
     return this.authService.login(user);
   }
 
+  /**
+   * Gets user profile
+   * @param user Authenticated user after providing valid credentials
+   * @returns User profile
+   */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('profile')
