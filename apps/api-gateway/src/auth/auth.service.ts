@@ -2,6 +2,7 @@ import { AppLoggerService } from '@app/shared';
 import { CreateUserDto } from '@app/shared/dto/create-user.dto';
 import { User } from '@app/shared/interfaces/user.interface';
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { comparePasswords } from 'apps/user/src/utils/helpers';
 import { lastValueFrom } from 'rxjs';
 import { UserService } from '../user/user.service';
@@ -10,6 +11,7 @@ import { UserService } from '../user/user.service';
 export class AuthService {
   constructor(
     private readonly userService: UserService,
+    private readonly jwtService: JwtService,
     private readonly logger: AppLoggerService,
   ) {
     logger.setContext(AuthService.name);
@@ -38,5 +40,11 @@ export class AuthService {
     }
     this.logger.log('User is authenticated');
     return user as User;
+  }
+
+  async login(user: User) {
+    const payload = { sub: user.id, email: user.email };
+    const accessToken = await this.jwtService.signAsync(payload);
+    return { accessToken };
   }
 }

@@ -50,6 +50,6 @@ export class AuthController {
   @ApiBody({ type: LoginCredentialsDto })
   @Post('login')
   async login(@AuthUser() user: User) {
-    return user;
+    return this.authService.login(user);
   }
 }

@@ -17,6 +17,7 @@ import { UserModule } from './user/user.module';
       isGlobal: true,
       validationSchema: joi.object({
         PORT: joi.number().port().default(3000),
+        JWT_SECRET: joi.string().trim().base64(),
       }),
     }),
     AppLoggerModule,
