@@ -1,21 +1,23 @@
+import { AuthUser } from '@app/shared/decorators/auth-user.decorator';
 import { CreateUserDto } from '@app/shared/dto/create-user.dto';
 import { Routes } from '@app/shared/general/routes.constants';
+import { AuthenticatedUser } from '@app/shared/interfaces/auth.interface';
 import {
   Body,
   Controller,
   Get,
-  Headers,
   Param,
   ParseIntPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { HeaderAuthGuard } from '../auth/guards/header-auth.guard';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserService } from './user.service';
 
 @ApiTags('user')
-@UseGuards(HeaderAuthGuard)
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller(Routes.USERS)
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -24,8 +26,8 @@ export class UserController {
    * Gets all users
    */
   @Get()
-  async getAllUsers(@Headers('X-User-ID') userId: number) {
-    return this.userService.getAllUsers(Number(userId));
+  async getAllUsers(@AuthUser() user: AuthenticatedUser) {
+    return this.userService.getAllUsers(user.id);
   }
 
   /**
@@ -34,10 +36,10 @@ export class UserController {
    */
   @Get(':selectUserId')
   async getUserById(
-    @Headers('X-User-ID') userId: number,
+    @AuthUser() user: AuthenticatedUser,
     @Param('selectUserId', ParseIntPipe) selectUserId: number,
   ) {
-    return this.userService.getUserById(Number(userId), selectUserId);
+    return this.userService.getUserById(user.id, selectUserId);
   }
 
   /**
@@ -45,10 +47,7 @@ export class UserController {
    * @param credentials User details for the created user
    */
   @Post()
-  async createUser(
-    @Headers('X-User-ID') userId: number,
-    @Body() credentials: CreateUserDto,
-  ) {
+  async createUser(@Body() credentials: CreateUserDto) {
     return this.userService.createUser(credentials);
   }
 }
