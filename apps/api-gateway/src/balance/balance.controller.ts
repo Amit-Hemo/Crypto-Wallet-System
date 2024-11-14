@@ -31,9 +31,10 @@ import { HeaderAuthGuard } from '../auth/guards/header-auth.guard';
 @UseGuards(HeaderAuthGuard)
 @Controller(Routes.BALANCES)
 export class BalanceController {
-  @Inject(Services.BALANCE)
-  private readonly clientBalanceService: ClientProxy;
-  constructor() {}
+  constructor(
+    @Inject(Services.BALANCE)
+    private readonly clientBalanceService: ClientProxy,
+  ) {}
 
   /**
    * Add a new asset to the user's balance or add to an existing one by amount
