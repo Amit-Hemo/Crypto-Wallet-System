@@ -18,6 +18,7 @@ export class AuthService {
   }
 
   async registerUser(credentials: CreateUserDto) {
+    this.logger.log('Registering new user...');
     const res = await this.userService.createUser(credentials);
     this.logger.log('Successfully registered new user');
     return res;
@@ -43,8 +44,19 @@ export class AuthService {
   }
 
   async login(user: User) {
+    this.logger.log(`Logging in user: ${user.id}`);
     const payload = { sub: user.id, email: user.email };
     const accessToken = await this.jwtService.signAsync(payload);
     return { accessToken };
+  }
+
+  async getProfile(userId: number) {
+    this.logger.log(`Getting profile for user ${userId}`);
+    const userProfileResponse = await this.userService.getUserById(
+      userId,
+      userId,
+    );
+    this.logger.log('Successfully retrieved user profile');
+    return userProfileResponse;
   }
 }

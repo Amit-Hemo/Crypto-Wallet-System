@@ -17,6 +17,7 @@ async function bootstrap() {
       'The system will allow users to manage their crypto holdings and view current valuations.',
     )
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);

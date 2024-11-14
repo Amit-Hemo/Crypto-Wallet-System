@@ -1,11 +1,18 @@
 import { Request } from 'express';
-import { User } from './user.interface';
+import { JwtAuthUser, User } from './user.interface';
 
 export interface UserLoginDetails {
   email: string;
   password: string;
 }
 
-export interface AuthenticatedRequest extends Request {
-  user: User;
+export type AuthenticatedUser = User | JwtAuthUser;
+
+export interface LoginAuthRequest extends Request {
+  user: AuthenticatedUser;
+}
+
+export interface JwtPayload {
+  sub: number;
+  email: string;
 }

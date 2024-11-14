@@ -3,6 +3,7 @@ import { AuthUser } from '@app/shared/decorators/auth-user.decorator';
 import { CreateUserDto } from '@app/shared/dto/create-user.dto';
 import { LoginCredentialsDto } from '@app/shared/dto/login-credentials.dto';
 import { Routes } from '@app/shared/general/routes.constants';
+import { AuthenticatedUser } from '@app/shared/interfaces/auth.interface';
 import { User } from '@app/shared/interfaces/user.interface';
 import {
   BadRequestException,
@@ -13,8 +14,9 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @UsePipes(
@@ -51,5 +53,12 @@ export class AuthController {
   @Post('login')
   async login(@AuthUser() user: User) {
     return this.authService.login(user);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('profile')
+  async getProfile(@AuthUser() user: AuthenticatedUser) {
+    return this.authService.getProfile(user.id);
   }
 }

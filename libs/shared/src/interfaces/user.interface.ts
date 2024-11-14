@@ -5,6 +5,11 @@ export interface User {
   password?: string;
 }
 
+export interface JwtAuthUser {
+  id: number;
+  email: string;
+}
+
 export interface UserSelectionOptions {
   exposePassword?: boolean;
 }
