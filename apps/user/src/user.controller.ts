@@ -40,7 +40,7 @@ export class UserController {
     this.logger.log(`Received request to retrieve user for user: ${userId}`);
     try {
       const user = await this.userService.getUserById(selectUserId);
-      const message = `Successfully retrieved the user ${selectUserId}`;
+      const message = `Successfully retrieved the user(if exists) ${selectUserId}`;
       this.logger.log(message);
       return new SuccessResponse(message, user);
     } catch (error) {
@@ -57,7 +57,7 @@ export class UserController {
       const user = await this.userService.getUserByEmail(email, {
         exposePassword: true,
       });
-      const message = `Successfully found and retreieved the user`;
+      const message = `Successfully found and retreieved the user if exists`;
       this.logger.log(message);
       return user;
     } catch (error) {

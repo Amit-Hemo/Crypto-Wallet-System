@@ -25,21 +25,21 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<User | null> {
     this.logger.log('Validating user');
-    const { password: hashedPassword, ...user } =
-      await lastValueFrom<User | null>(
-        await this.userService.getUserByEmail(email),
-      );
+    const user = await lastValueFrom<User | null>(
+      await this.userService.getUserByEmail(email),
+    );
     if (!user) {
       this.logger.error('Tried to validate a non existing user');
       return null;
     }
+    const { password: hashedPassword, ...userDetails } = user;
     const isPasswordValid = await comparePasswords(password, hashedPassword);
     if (!isPasswordValid) {
       this.logger.error(`User with id ${user.id} provided a wrong password`);
       return null;
     }
     this.logger.log('User is authenticated');
-    return user as User;
+    return userDetails as User;
   }
 
   async login(user: User) {

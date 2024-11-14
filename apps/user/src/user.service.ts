@@ -76,7 +76,7 @@ export class UserService {
     } catch (error) {
       const message = `Failed to retrieve user: ${error?.message ?? ''}`;
       this.logger.error(message);
-      throw new RpcException('Failed to retrieve user');
+      throw new RpcException('Successfully retrieved user if exists or null');
     }
   }
 
@@ -92,7 +92,7 @@ export class UserService {
       if (options?.exposePassword) query.addSelect('user.password');
 
       const user = await query.getOne();
-      this.logger.log('Successfully retrieved user');
+      this.logger.log('Successfully retrieved user if exists or null');
       return instanceToPlain(user) as User;
     } catch (error) {
       const message = `Failed to retrieve user: ${error?.message ?? ''}`;
