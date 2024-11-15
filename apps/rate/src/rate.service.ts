@@ -1,5 +1,5 @@
 import { AppLoggerService } from '@app/shared';
-import { generateCacheKey } from '@app/shared/cache/cache-key.util';
+import { generateRateCacheKey } from '@app/shared/cache/cache-key.util';
 import { TTlTimes } from '@app/shared/cache/ttl-times';
 import {
   CoinGeckoApiRateResponse,
@@ -141,7 +141,7 @@ export class RateService {
     const cachedResults: Rate[] = [];
 
     for (const id of assetIds) {
-      const cacheKey = generateCacheKey(id, currency);
+      const cacheKey = generateRateCacheKey(id, currency);
       try {
         const cachedRate = await this.cacheManager.get<number>(cacheKey);
         if (cachedRate) {
@@ -167,7 +167,7 @@ export class RateService {
     for (const data of fetchResults) {
       const assetId = Object.keys(data)[0];
       const rate = Object.values(data)[0];
-      const cacheKey = generateCacheKey(assetId, currency);
+      const cacheKey = generateRateCacheKey(assetId, currency);
       try {
         await this.cacheManager.set(cacheKey, rate, ttl);
       } catch (error) {

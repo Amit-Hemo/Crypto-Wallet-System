@@ -15,4 +15,7 @@ export interface LoginAuthRequest extends Request {
 export interface JwtPayload {
   sub: number;
   email: string;
+  jti: string;
+  iat: number;
+  exp: number;
 }

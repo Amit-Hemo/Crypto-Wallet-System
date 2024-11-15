@@ -1,5 +1,6 @@
 import { AppLoggerModule } from '@app/shared';
 import { AllExceptionsFilter } from '@app/shared/error-handling/http-exception/http-exception.filter';
+import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
@@ -24,6 +25,7 @@ import { UserModule } from './user/user.module';
     BalanceModule,
     UserModule,
     AuthModule,
+    CacheModule.register({ isGlobal: true }),
     ThrottlerModule.forRoot([
       {
         ttl: 15 * 60 * 1000,
