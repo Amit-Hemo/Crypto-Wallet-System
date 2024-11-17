@@ -1,4 +1,5 @@
 import { AppLoggerService } from '@app/shared';
+import { SuccessResponse } from '@app/shared/api/responses';
 import { generateRevokedTokenCacheKey } from '@app/shared/cache/cache-key.util';
 import { TTlTimes } from '@app/shared/cache/ttl-times';
 import { CreateUserDto } from '@app/shared/dto/create-user.dto';
@@ -11,10 +12,10 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { comparePasswords } from 'apps/user/src/utils/helpers';
 import { lastValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { UserService } from '../user/user.service';
+import { comparePasswords } from './utils/helpers';
 
 @Injectable()
 export class AuthService {
@@ -119,15 +120,20 @@ export class AuthService {
     }
   }
 
-  async getProfile(userId: number) {
+  async getProfile(userId: number): Promise<User> {
     try {
       this.logger.log(`Getting profile for user ${userId}`);
-      const userProfileResponse = await this.userService.getUserById(
-        userId,
-        userId,
+      const response = await lastValueFrom<SuccessResponse<User | null>>(
+        await this.userService.getUserById(userId, userId),
       );
+      const user = response.data;
+      if (!user) {
+        throw new Error(
+          'Tried to retrieve information of unregistered user, make sure user was not accidently deleted',
+        );
+      }
       this.logger.log('Successfully retrieved user profile');
-      return userProfileResponse;
+      return user;
     } catch (error) {
       this.logger.error(
         `Failed to retrieve user profile ${error?.message ?? ''}`,

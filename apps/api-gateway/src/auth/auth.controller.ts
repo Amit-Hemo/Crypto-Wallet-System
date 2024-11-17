@@ -13,6 +13,9 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
   Post,
   Req,
   UseGuards,
@@ -64,6 +67,7 @@ export class AuthController {
    */
   @UseGuards(LocalAuthGuard)
   @ApiBody({ type: LoginCredentialsDto, description: 'Login credentials' })
+  @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@AuthUser() user: User) {
     this.logger.log(
@@ -86,6 +90,7 @@ export class AuthController {
    */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('logout')
   async logout(@Req() req: LoginAuthRequest) {
     this.logger.log('Recieved request to logout user');
@@ -107,12 +112,13 @@ export class AuthController {
    */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @Post('profile')
+  @Get('profile')
   async getProfile(@AuthUser() user: AuthenticatedUser) {
     try {
       this.logger.log('Recieved request to get user profile');
       const profile = await this.authService.getProfile(user.id);
-      return profile;
+      const message = `Successfully retrieved user profile for ${user.id}`;
+      return new SuccessResponse(message, profile);
     } catch (error) {
       this.logger.error(`Failed to get user profile ${error?.message ?? ''}`);
       throw error;
